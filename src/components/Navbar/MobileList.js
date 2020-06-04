@@ -19,19 +19,19 @@ const MobileList = (props) => {
       style={container} 
       className="list-mobile"
     >
-      <li style={styles.item} >
+      <li style={styles.item} onClick={() => window.location.href='#AboutMe'} >
         Sobre
       </li>
       <span style={barra} />
-      <li style={styles.item}>
+      <li style={styles.item} onClick={() => window.location.href='#Skills'} >
         Skills
       </li>
-      <span style={barra} />
+      <span style={barra} onClick={() => window.location.href='#Projects'} />
       <li style={styles.item}>
         Projetos
       </li>
       <span style={barra} />
-      <li style={styles.item}>
+      <li style={styles.item} onClick={() => window.location.href='#Contact'} >
         Contato
       </li>
     </div>

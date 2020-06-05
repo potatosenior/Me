@@ -26,8 +26,8 @@ const MobileList = (props) => {
       <li style={styles.item} onClick={() => window.location.href='#Skills'} >
         Skills
       </li>
-      <span style={barra} onClick={() => window.location.href='#Projects'} />
-      <li style={styles.item}>
+      <span style={barra} />
+      <li style={styles.item} onClick={() => window.location.href='#Projects'}>
         Projetos
       </li>
       <span style={barra} />

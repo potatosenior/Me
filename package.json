@@ -1,0 +1,24 @@
+{
+  "name": "curriculo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "browserify": "^17.0.0",
+    "watchify": "^3.11.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "dev": "watchify src/js/main.js -o src/static/bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/potatosenior/Me.git"
+  },
+  "author": "Joao Pedro",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/potatosenior/Me/issues"
+  },
+  "homepage": "https://github.com/potatosenior/Me#readme"
+}

@@ -1,4 +1,5 @@
 ./nodemodules
+/nodemodules
 nodemodules
 nodemodules/
 nodemodules/*

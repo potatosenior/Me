@@ -13,7 +13,7 @@ main {
 }
 
 main {
-  background-image: url("/assets/wallpaper1.jpg");
+  background-image: url("../../assets/wallpaper3.gif");
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -323,6 +323,13 @@ task_bar {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-left: 3rem;
+  padding-right: 3rem;
+}
+
+.__window_fullscren .__about_me {
+  padding-left: 10rem !important;
+  padding-right: 10rem !important;
 }
 
 .__about_me h1 {

@@ -9,7 +9,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "dev": "watchify src/js/main.js -o src/static/bundle.js"
+    "dev": "watchify src/js/index.js -o src/static/bundle.js"
   },
   "repository": {
     "type": "git",

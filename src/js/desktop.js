@@ -38,6 +38,13 @@ const desktopListener = pilha => {
 
       elem.classList.add("focused");
 
+      if (source == "projects") {
+        var script = document.createElement("script");
+        script.src = "https://platform.twitter.com/widgets.js";
+        script.async = true;
+        document.head.appendChild(script);
+      }
+
       // seleciona o template de icon da barra de tarefas
       const icon_template = document.querySelector(`#${source}_icon`);
       let icon_tmp = document.createElement("div");

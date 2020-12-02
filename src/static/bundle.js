@@ -39,6 +39,13 @@ const desktopListener = pilha => {
 
       elem.classList.add("focused");
 
+      if (source == "projects") {
+        var script = document.createElement("script");
+        script.src = "https://platform.twitter.com/widgets.js";
+        script.async = true;
+        document.head.appendChild(script);
+      }
+
       // seleciona o template de icon da barra de tarefas
       const icon_template = document.querySelector(`#${source}_icon`);
       let icon_tmp = document.createElement("div");
@@ -114,7 +121,29 @@ menu_icon.addEventListener("click", () => {
 },{}],4:[function(require,module,exports){
 // require("./window.js")();
 const date_time = document.getElementById("date_time");
-
+const week_days = [
+  "segunda-feira",
+  "terçar-feira",
+  "quarta-feira",
+  "quinta-feira",
+  "sexta-feira",
+  "sábado",
+  "domingo",
+];
+const month_days = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];
 // data inicial
 date_time.innerHTML =
   new Date().getDate() +
@@ -127,14 +156,25 @@ date_time.innerHTML =
 
 // atualizar a data a cada segundo
 setInterval(() => {
+  let date = new Date();
+
   date_time.innerHTML =
-    new Date().getDate() +
+    date.getDate() +
     "/" +
-    new Date().getMonth() +
+    date.getMonth() +
     "/" +
-    new Date().getFullYear() +
+    date.getFullYear() +
     "<br>" +
-    new Date().toLocaleTimeString();
+    date.toLocaleTimeString();
+
+  date_time.title =
+    week_days[date.getDay() - 1] +
+    ", " +
+    date.getDate() +
+    " de " +
+    month_days[date.getMonth() - 1] +
+    " de " +
+    date.getFullYear();
 }, 1000);
 
 document.querySelectorAll(".__task_bar_icon").forEach(icon => {

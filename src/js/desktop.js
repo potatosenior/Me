@@ -39,7 +39,7 @@ icons.forEach(icon => {
 });
 
 const desktopListener = pilha => {
-  document.querySelectorAll(".__desktop_icon").forEach(icon => {
+  icons.forEach(icon => {
     icon.addEventListener("dblclick", () => {
       // nome unico global
       const source = icon.dataset.source;
@@ -127,6 +127,10 @@ const desktopListener = pilha => {
 
       // listeners do icon na barra de tarefas
       icon_elem.addEventListener("click", () => new_window.icon_click());
+
+      icons.forEach(icon => {
+        icon.classList.remove("focused");
+      });
 
       pilha.push(new_window);
     });

@@ -1,5 +1,43 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 const { Window } = require("./window.js");
+const icons = document.querySelectorAll(".__desktop_icon");
+
+document.querySelector("html").addEventListener("click", e => {
+  // desfoca algum icone focado se o usuario clicou em qualquer outra coisa
+  let click_in_icon = false;
+
+  icons.forEach(icon => {
+    // verifica se o click foi em algum icone
+    if (icon.contains(e.target)) click_in_icon = true;
+  });
+
+  if (!click_in_icon)
+    // se o click nao foi em um icone, remove o focus de todos icones
+    icons.forEach(icon => {
+      icon.classList.remove("focused");
+    });
+});
+
+document.querySelector(".__desktop").addEventListener("click", () => {
+  document.querySelectorAll(".__window").forEach(window => {
+    window.classList.remove("focused");
+    document
+      .querySelectorAll(`[data-target="${window.dataset.app}"]`)
+      .forEach(icon => {
+        icon.classList.remove("focused");
+      });
+  });
+});
+
+icons.forEach(icon => {
+  icon.addEventListener("click", () => {
+    icon.classList.add("focused");
+
+    icons.forEach(icon2 => {
+      if (icon !== icon2) icon2.classList.remove("focused");
+    });
+  });
+});
 
 const desktopListener = pilha => {
   document.querySelectorAll(".__desktop_icon").forEach(icon => {
@@ -37,9 +75,10 @@ const desktopListener = pilha => {
         .querySelector("main")
         .insertAdjacentElement("afterbegin", window_tmp.querySelector("div"));
 
-      elem.classList.add("focused");
+      // elem.classList.add("focused");
 
       if (source == "projects") {
+        // adiciona o script do embemed do Twitter
         var script = document.createElement("script");
         script.src = "https://platform.twitter.com/widgets.js";
         script.async = true;
@@ -51,7 +90,7 @@ const desktopListener = pilha => {
       let icon_tmp = document.createElement("div");
       // adiciona as propriedades ao icone
       icon_tmp.classList.add("__task_bar_icon");
-      icon_tmp.classList.add("focused");
+      // icon_tmp.classList.add("focused");
       icon_tmp.dataset.target = source;
       icon_tmp.innerHTML = icon_template.textContent;
 
@@ -62,11 +101,12 @@ const desktopListener = pilha => {
 
       // inicializa o objeto window
       var new_window = new Window(elem, icon_elem);
+      new_window.focus_elem();
 
       const top_bar = elem.querySelector(".__window_top_bar");
 
       // listeners da janela
-      elem.addEventListener("click", () => new_window.focus());
+      elem.addEventListener("click", () => new_window.focus_elem());
 
       //adiciona os listeners da barra do topo
       top_bar
@@ -87,7 +127,7 @@ const desktopListener = pilha => {
       });
 
       // listeners do icon na barra de tarefas
-      icon_elem.addEventListener("click", () => new_window.minimize());
+      icon_elem.addEventListener("click", () => new_window.icon_click());
 
       pilha.push(new_window);
     });
@@ -113,9 +153,32 @@ desktopListener(windows);
 const menu = document.getElementById("_menu");
 const menu_icon = document.getElementById("_menu_icon");
 
+document.querySelector("html").addEventListener("click", e => {
+  // fecha o menu se ele estiver aberto e o usuario clicar em
+  // qualquer lugar que nao seja no menu ou no icone de abrir o menu
+  if (
+    !document.querySelector("#_menu").contains(e.target) &&
+    !document.querySelector("#_menu_icon").contains(e.target)
+  ) {
+    menu.classList.remove("active");
+    menu.classList.add("unactive");
+
+    return;
+  }
+});
+
 menu_icon.addEventListener("click", () => {
   menu.classList.toggle("active");
   menu.classList.toggle("unactive");
+
+  document.querySelectorAll(".__window").forEach(window => {
+    window.classList.remove("focused");
+    document
+      .querySelectorAll(`[data-target="${window.dataset.app}"]`)
+      .forEach(icon => {
+        icon.classList.remove("focused");
+      });
+  });
 });
 
 },{}],4:[function(require,module,exports){
@@ -199,6 +262,29 @@ class Window {
     return this.elem;
   }
 
+  focus_elem() {
+    if (this.elem.classList.contains("__window_minimized")) return;
+    this.elem.classList.add("focused");
+    this.icon.classList.add("focused");
+
+    document.querySelectorAll(".__window").forEach(window => {
+      if (window.dataset.app != this.elem.dataset.app) {
+        window.classList.remove("focused");
+        document
+          .querySelectorAll(`[data-target="${window.dataset.app}"]`)
+          .forEach(icon => {
+            icon.classList.remove("focused");
+          });
+      }
+    });
+  }
+
+  unfocus_elem() {
+    console.log("unfocus");
+    this.elem.classList.remove("focused");
+    this.icon.classList.remove("focused");
+  }
+
   maximize() {
     this.elem.classList.toggle("__window_fullscren");
   }
@@ -207,17 +293,19 @@ class Window {
     this.elem.classList.toggle("__window_minimized");
 
     if (this.elem.classList.contains("__window_minimized")) {
-      this.icon.classList.remove("focused");
-      this.elem.classList.remove("focused");
+      this.unfocus_elem();
     } else {
-      this.elem.classList.add("focused");
-      this.icon.classList.add("focused");
+      this.focus_elem();
     }
   }
 
-  focus() {
-    this.elem.classList.add("focused");
-    this.icon.classList.add("focused");
+  icon_click() {
+    if (this.elem.classList.contains("__window_minimized")) {
+      this.minimize();
+    } else {
+      if (this.elem.classList.contains("focused")) this.minimize();
+      else this.focus_elem();
+    }
   }
 }
 

@@ -1,4 +1,42 @@
 const { Window } = require("./window.js");
+const icons = document.querySelectorAll(".__desktop_icon");
+
+document.querySelector("html").addEventListener("click", e => {
+  // desfoca algum icone focado se o usuario clicou em qualquer outra coisa
+  let click_in_icon = false;
+
+  icons.forEach(icon => {
+    // verifica se o click foi em algum icone
+    if (icon.contains(e.target)) click_in_icon = true;
+  });
+
+  if (!click_in_icon)
+    // se o click nao foi em um icone, remove o focus de todos icones
+    icons.forEach(icon => {
+      icon.classList.remove("focused");
+    });
+});
+
+document.querySelector(".__desktop").addEventListener("click", () => {
+  document.querySelectorAll(".__window").forEach(window => {
+    window.classList.remove("focused");
+    document
+      .querySelectorAll(`[data-target="${window.dataset.app}"]`)
+      .forEach(icon => {
+        icon.classList.remove("focused");
+      });
+  });
+});
+
+icons.forEach(icon => {
+  icon.addEventListener("click", () => {
+    icon.classList.add("focused");
+
+    icons.forEach(icon2 => {
+      if (icon !== icon2) icon2.classList.remove("focused");
+    });
+  });
+});
 
 const desktopListener = pilha => {
   document.querySelectorAll(".__desktop_icon").forEach(icon => {
@@ -36,9 +74,10 @@ const desktopListener = pilha => {
         .querySelector("main")
         .insertAdjacentElement("afterbegin", window_tmp.querySelector("div"));
 
-      elem.classList.add("focused");
+      // elem.classList.add("focused");
 
       if (source == "projects") {
+        // adiciona o script do embemed do Twitter
         var script = document.createElement("script");
         script.src = "https://platform.twitter.com/widgets.js";
         script.async = true;
@@ -50,7 +89,7 @@ const desktopListener = pilha => {
       let icon_tmp = document.createElement("div");
       // adiciona as propriedades ao icone
       icon_tmp.classList.add("__task_bar_icon");
-      icon_tmp.classList.add("focused");
+      // icon_tmp.classList.add("focused");
       icon_tmp.dataset.target = source;
       icon_tmp.innerHTML = icon_template.textContent;
 
@@ -61,11 +100,12 @@ const desktopListener = pilha => {
 
       // inicializa o objeto window
       var new_window = new Window(elem, icon_elem);
+      new_window.focus_elem();
 
       const top_bar = elem.querySelector(".__window_top_bar");
 
       // listeners da janela
-      elem.addEventListener("click", () => new_window.focus());
+      elem.addEventListener("click", () => new_window.focus_elem());
 
       //adiciona os listeners da barra do topo
       top_bar
@@ -86,7 +126,7 @@ const desktopListener = pilha => {
       });
 
       // listeners do icon na barra de tarefas
-      icon_elem.addEventListener("click", () => new_window.minimize());
+      icon_elem.addEventListener("click", () => new_window.icon_click());
 
       pilha.push(new_window);
     });

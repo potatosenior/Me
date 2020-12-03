@@ -55,13 +55,22 @@ svg {
   margin-left: 10px;
   margin-top: 15px;
   border: solid 1px transparent;
-  border-radius: 5px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.__desktop_icon.focused {
+  border: solid 1px hsla(0, 0%, 78.4%, 0.3);
+  background-color: hsla(0, 0%, 78.4%, 0.15);
+}
+
+.__desktop_icon.focused:hover {
+  background-color: hsla(0, 0%, 78.4%, 0.3);
 }
 
 .__desktop_icon:hover {
-  cursor: pointer;
-  border: solid 1px #eeeeee;
-  background-color: rgba(218, 224, 252, 0.3);
+  border: solid 1px hsla(0, 0%, 78.4%, 0.3);
+  background-color: hsla(0, 0%, 78.4%, 0.15);
 }
 
 .__desktop_icon img {
@@ -111,6 +120,10 @@ svg {
   z-index: 1000;
 }
 
+.__window.focused .__window_top_bar {
+  background-color: #121212;
+}
+
 .__window_fullscren {
   width: 100%;
   height: 95% !important;
@@ -136,7 +149,7 @@ svg {
   height: 5% !important;
   /* min-height: 30px; */
   padding: 0px;
-  background-color: #121212;
+  background-color: #191919;
 }
 
 .__window_top_bar span {
@@ -163,6 +176,15 @@ svg {
   height: 95%;
   background-color: #212121;
   color: white;
+  transition: background-color 0.3s;
+}
+
+.__window.focused .__window_content {
+  background-color: #212121da;
+}
+
+.__window.focused.__window_fullscren .__window_content {
+  background-color: #212121ef;
 }
 
 /* ------------------------- MENU */

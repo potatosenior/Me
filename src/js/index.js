@@ -1,11 +1,10 @@
-// const { minimize } = require("./window.js");
-
-require("./menu.js");
+require("./settings_system.js");
+require("./actions.js");
+const desktop = require("./desktop.js");
 require("./task_bar.js");
-const desktopListener = require("./desktop.js");
-// require("./window.js");
+const menu = require("./menu.js");
 
-var windows = [];
+desktop();
+menu();
+
 console.log("hello world!!");
-
-desktopListener(windows);

@@ -1,4 +1,3 @@
-// require("./window.js")();
 const date_time = document.getElementById("date_time");
 const week_days = [
   "segunda-feira",
@@ -55,13 +54,3 @@ setInterval(() => {
     " de " +
     date.getFullYear();
 }, 1000);
-
-document.querySelectorAll(".__task_bar_icon").forEach(icon => {
-  if (icon.id !== "_menu_icon") {
-    const target = icon.dataset.target;
-    const window = document.querySelector(`[data-app="${target}"]`);
-
-    if (target && window)
-      icon.addEventListener("click", () => minimize(window));
-  }
-});

@@ -1,192 +1,364 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-const { Window } = require("./window.js");
-const icons = document.querySelectorAll(".__desktop_icon");
+const { createWindow } = require("./window.js");
 
-document.querySelector("html").addEventListener("click", e => {
-  // desfoca algum icone focado se o usuario clicou em qualquer outra coisa
-  let click_in_icon = false;
+const openApp = source => {
+  const open = document.querySelector(`[data-app='${source}']`);
 
-  icons.forEach(icon => {
-    // verifica se o click foi em algum icone
-    if (icon.contains(e.target)) click_in_icon = true;
-  });
+  if (open) {
+    // app ja esta aberto, então foca o mesmo
+    open.classList.remove("__window_minimized");
+    open.classList.add("focused");
 
-  if (!click_in_icon)
-    // se o click nao foi em um icone, remove o focus de todos icones
-    icons.forEach(icon => {
-      icon.classList.remove("focused");
-    });
-});
-
-document.querySelector(".__desktop").addEventListener("click", () => {
-  document.querySelectorAll(".__window").forEach(window => {
-    window.classList.remove("focused");
     document
-      .querySelectorAll(`[data-target="${window.dataset.app}"]`)
-      .forEach(icon => {
-        icon.classList.remove("focused");
-      });
-  });
-});
+      .querySelectorAll(".__window")
+      .forEach(window => window.classList.remove("last_focused"));
 
-icons.forEach(icon => {
-  icon.addEventListener("click", () => {
-    icon.classList.add("focused");
+    open.classList.add("last_focused");
 
-    icons.forEach(icon2 => {
-      if (icon !== icon2) icon2.classList.remove("focused");
+    document
+      .querySelectorAll(`[data-target='${source}']`)[1]
+      .classList.add("focused");
+
+    return;
+  }
+
+  createWindow(source);
+};
+
+const createElementFromHTML = htmlString => {
+  // help: https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro
+  var div = document.createElement("div");
+  div.innerHTML = htmlString.trim();
+
+  // Change this to div.childNodes to support multiple top-level nodes
+  return div.firstChild;
+};
+
+module.exports = { createElementFromHTML, openApp };
+
+},{"./window.js":8}],2:[function(require,module,exports){
+const { openApp } = require("./actions.js");
+
+const shortcuts = document.querySelectorAll(".__desktop_icon");
+
+const windowAndIconsFocusListener = () => {
+  document.querySelector(".__desktop").addEventListener("click", e => {
+    // desfoca as janelas e os icones na barra de tarefa se clicar fora dos mesmos
+    let click_in_window = false;
+    let click_in_icon = false;
+    let click_in_menu_item = false;
+    let click_in_shortcut = false;
+    let menu_items = document.querySelector("#_menu").querySelectorAll("li");
+    let windows = document.querySelectorAll(".__window");
+    let icons = document.querySelectorAll(`.__task_bar_icon[data-target]`);
+
+    windows.forEach(window => {
+      // percorre todas janelas e verifica se o clique foi em alguma
+      if (window.contains(e.target)) click_in_window = true;
     });
-  });
-});
 
-const desktopListener = pilha => {
-  icons.forEach(icon => {
-    icon.addEventListener("dblclick", () => {
-      // nome unico global
-      const source = icon.dataset.source;
-      const open = document.querySelector(`[data-app='${source}']`);
+    icons.forEach(icon => {
+      // percorre todos icones e verifica se o clique foi em algum
+      if (icon.contains(e.target)) click_in_icon = true;
+    });
 
-      if (open) {
-        // app ja esta aberto
-        open.classList.remove("__window_minimized");
-        return;
-      }
+    menu_items.forEach(item => {
+      // percorre todos items do menu
+      // tem que fazer isso pra evitar que a janela de config nao abra desfocada
+      if (item.contains(e.target)) click_in_menu_item = true;
+    });
 
-      // ---- WINDOW
-      const window_template = document.querySelector(`#${source}_template`);
+    shortcuts.forEach(shortcut => {
+      // percorre todos atalhos
+      if (shortcut.contains(e.target)) click_in_shortcut = true;
+    });
 
-      // CRIA UMA DIV TEMPORARIA PRA INSERIR A JANELA
-      let window_tmp = document.createElement("div");
-
-      window_tmp.innerHTML = document.querySelector(
-        "#blank_window_template"
-      ).textContent;
-      // coloca o titulo
-      window_tmp.querySelector("span").textContent =
-        window_template.dataset.title;
-      // coloca o dataset app
-      window_tmp.querySelector("[data-app]").dataset.app = source;
-      // adiciona o conteudo do app na janela vazia
-      window_tmp.querySelector(".__window_content").innerHTML =
-        window_template.textContent;
-
-      // janela ja na DOM
-      var elem = document
-        .querySelector("main")
-        .insertAdjacentElement("afterbegin", window_tmp.querySelector("div"));
-
-      // elem.classList.add("focused");
-
-      if (source == "projects") {
-        // adiciona o script do embemed do Twitter
-        var script = document.createElement("script");
-        script.src = "https://platform.twitter.com/widgets.js";
-        script.async = true;
-        document.head.appendChild(script);
-      }
-
-      // seleciona o template de icon da barra de tarefas
-      const icon_template = document.querySelector(`#${source}_icon`);
-      let icon_tmp = document.createElement("div");
-      // adiciona as propriedades ao icone
-      icon_tmp.classList.add("__task_bar_icon");
-      // icon_tmp.classList.add("focused");
-      icon_tmp.dataset.target = source;
-      icon_tmp.innerHTML = icon_template.textContent;
-
-      // insere o icon na barra de tarefas
-      var icon_elem = document
-        .querySelector("#_taskbar_icons")
-        .appendChild(icon_tmp);
-
-      // inicializa o objeto window
-      var new_window = new Window(elem, icon_elem);
-      new_window.focus_elem();
-
-      const top_bar = elem.querySelector(".__window_top_bar");
-
-      // listeners da janela
-      elem.addEventListener("click", () => new_window.focus_elem());
-
-      //adiciona os listeners da barra do topo
-      top_bar
-        .querySelector("[data-minimize]")
-        .addEventListener("click", () => new_window.minimize());
-
-      top_bar
-        .querySelector("[data-maximize]")
-        .addEventListener("click", () => new_window.maximize());
-
-      top_bar.querySelector("[data-close]").addEventListener("click", () => {
-        pilha = pilha.filter(windows => {
-          windows != new_window;
-        });
-        // remover da DOM
-        elem.remove();
-        icon_elem.remove();
+    if (!click_in_shortcut) {
+      // desfoca todos atalhos se o click nao foi em algum
+      shortcuts.forEach(shortcut => {
+        shortcut.classList.remove("focused");
       });
+    }
 
-      // listeners do icon na barra de tarefas
-      icon_elem.addEventListener("click", () => new_window.icon_click());
+    if (!click_in_window && !click_in_icon && !click_in_menu_item) {
+      // se o clique nao foi em nenhum, desfocar todos
+      console.log("unfocus all");
+
+      windows.forEach(window => {
+        window.classList.remove("focused");
+      });
 
       icons.forEach(icon => {
         icon.classList.remove("focused");
       });
+    }
+  });
+};
 
-      pilha.push(new_window);
+const initDesktopShortcuts = () => {
+  let time = 100;
+
+  shortcuts.forEach(shortcut => {
+    // INICIALIZA OS ATALHOS NA AREA DE TRABALHO
+    setTimeout(() => {
+      // adiciona a animação para fazer um efeito de cascada
+      shortcut.classList.add("animate");
+    }, time);
+    time += 40;
+
+    // adiciona o listener de clck para focar o shortcut
+    shortcut.addEventListener("click", () => {
+      shortcut.classList.add("focused");
+
+      shortcuts.forEach(shortcut2 => {
+        if (shortcut !== shortcut2) shortcut2.classList.remove("focused");
+      });
+    });
+
+    // Adiciona o listener de abrir os aplicativos
+    shortcut.addEventListener("dblclick", () => {
+      // nome unico global
+      const source = shortcut.dataset.source;
+
+      openApp(source);
     });
   });
 };
 
-module.exports = desktopListener;
+const desktopInit = () => {
+  windowAndIconsFocusListener();
+  initDesktopShortcuts();
+};
 
-},{"./window.js":5}],2:[function(require,module,exports){
-// const { minimize } = require("./window.js");
+module.exports = desktopInit;
 
-require("./menu.js");
+},{"./actions.js":1}],3:[function(require,module,exports){
+const icons = document.querySelectorAll(".__desktop_icon");
+
+const createIcon = source => {
+  // seleciona o template de icon da barra de tarefas
+  const icon_template = document.querySelector(`#${source}_icon`);
+  let icon_tmp = document.createElement("div");
+  // adiciona as propriedades ao icone
+  icon_tmp.classList.add("__task_bar_icon");
+  // icon_tmp.classList.add("focused");
+  icon_tmp.dataset.target = source;
+  icon_tmp.innerHTML = icon_template.textContent;
+
+  // insere o icon na barra de tarefas
+  var icon_in_doom = document
+    .querySelector("#_taskbar_icons")
+    .appendChild(icon_tmp);
+
+  icons.forEach(icon => {
+    icon.classList.remove("focused");
+  });
+
+  return icon_in_doom;
+};
+
+module.exports = createIcon;
+
+},{}],4:[function(require,module,exports){
+require("./settings_system.js");
+require("./actions.js");
+const desktop = require("./desktop.js");
 require("./task_bar.js");
-const desktopListener = require("./desktop.js");
-// require("./window.js");
+const menu = require("./menu.js");
 
-var windows = [];
+desktop();
+menu();
+
 console.log("hello world!!");
 
-desktopListener(windows);
+},{"./actions.js":1,"./desktop.js":2,"./menu.js":5,"./settings_system.js":6,"./task_bar.js":7}],5:[function(require,module,exports){
+const { openApp } = require("./actions.js");
 
-},{"./desktop.js":1,"./menu.js":3,"./task_bar.js":4}],3:[function(require,module,exports){
 const menu = document.getElementById("_menu");
 const menu_icon = document.getElementById("_menu_icon");
 
-document.querySelector("html").addEventListener("click", e => {
-  // fecha o menu se ele estiver aberto e o usuario clicar em
-  // qualquer lugar que nao seja no menu ou no icone de abrir o menu
-  if (
-    !document.querySelector("#_menu").contains(e.target) &&
-    !document.querySelector("#_menu_icon").contains(e.target)
-  ) {
-    menu.classList.remove("active");
-    menu.classList.add("unactive");
-
-    return;
-  }
-});
-
-menu_icon.addEventListener("click", () => {
+const toggleMenu = () => {
   menu.classList.toggle("active");
   menu.classList.toggle("unactive");
+};
 
-  document.querySelectorAll(".__window").forEach(window => {
-    window.classList.remove("focused");
-    document
-      .querySelectorAll(`[data-target="${window.dataset.app}"]`)
-      .forEach(icon => {
-        icon.classList.remove("focused");
-      });
+const menuListeners = () => {
+  // fecha o menu se ele estiver aberto e o usuario clicar em
+  // qualquer lugar que nao seja no menu ou no icone de abrir o menu
+  document.querySelector("html").addEventListener("click", e => {
+    if (
+      !document.querySelector("#_menu").contains(e.target) &&
+      !document.querySelector("#_menu_icon").contains(e.target)
+    ) {
+      menu.classList.remove("active");
+      menu.classList.add("unactive");
+    }
   });
-});
 
-},{}],4:[function(require,module,exports){
-// require("./window.js")();
+  menu_icon.addEventListener("click", () => {
+    toggleMenu();
+  });
+
+  menu.querySelectorAll(".__menu_item").forEach(item => {
+    let source = item.dataset.source;
+
+    item.addEventListener("click", () => {
+      toggleMenu();
+      openApp(source);
+    });
+  });
+};
+
+const menuInit = () => {
+  menuListeners();
+};
+
+module.exports = menuInit;
+
+},{"./actions.js":1}],6:[function(require,module,exports){
+const { createElementFromHTML } = require("./actions.js");
+const { focus_window } = require("./window.js");
+
+const main = document.querySelector("main");
+
+// ---------------------- PERSONALIZE
+function changeBackgroundColor(color) {
+  main.style.backgroundImage = "none";
+  main.style.backgroundColor = color;
+}
+
+function loadImg() {
+  // cria um URL blob da imagem
+  //help: https://stackoverflow.com/questions/44666238/how-to-display-uploaded-image-when-user-clicks-on-a-button
+  const url = window.URL.createObjectURL(load_img.files[0]);
+
+  main.style.backgroundImage = `url("${url}")`;
+}
+
+function selectColor() {
+  changeBackgroundColor(load_color.value);
+  document.querySelector(".__load_color").style.backgroundColor =
+    load_color.value;
+}
+
+const config_personalize = () => {
+  const select = document.querySelector("#__config_1").querySelector("select");
+  const images = document.querySelector(".__opt_image");
+  const colors = document.querySelector(".__opt_colors");
+
+  const load_img = document.querySelector("#load_img");
+  const load_color = document.querySelector("#load_color");
+
+  const images_list = images.querySelectorAll("img");
+  const colors_list = colors.querySelectorAll("div");
+
+  select.addEventListener("change", () => {
+    // mostra as imagens ou cores para serem selecionados
+
+    if (select.value === "Imagem") {
+      images.classList.remove("hidden");
+      images.classList.add("shown");
+      colors.classList.remove("shown");
+      colors.classList.add("hidden");
+    } else {
+      colors.classList.add("shown");
+      colors.classList.remove("hidden");
+      images.classList.add("hidden");
+      images.classList.remove("shown");
+    }
+  });
+
+  images_list.forEach(img => {
+    img.addEventListener("click", () => {
+      main.style.backgroundImage = `url("${img.src}")`;
+    });
+  });
+
+  colors_list.forEach(color => {
+    color.addEventListener("click", () => {
+      changeBackgroundColor(color.style.backgroundColor);
+    });
+  });
+
+  load_img.addEventListener("change", loadImg);
+  load_color.addEventListener("input", selectColor);
+};
+// ---------------------------
+
+const configButtonBackHandler = window => {
+  // seleciona o template da config
+  const config_template = document.querySelector("#config_template");
+
+  // adiciona o conteudo a janela
+  window.innerHTML = config_template.textContent;
+  // adiciona novamente os listeners da tela de config
+  configInit();
+};
+
+const configSelect = config => {
+  // Adiciona o conteudo da config recebida por param
+  // a tela de config
+
+  // seleciona o template base
+  let config_base_template = document.querySelector("#config_base").textContent;
+  // cria um elemento a partir da base
+  let config_base = createElementFromHTML(config_base_template);
+  // seleciona o conteudo correto da configuração
+  let config_template = document.querySelector(
+    `[data-config_template="${config}"]`
+  ).textContent;
+  // cria um elemento do conteudo
+  let config_content = createElementFromHTML(config_template);
+  // adiciona o conteudo a base
+  config_base.appendChild(config_content);
+  // cria a uma div para adicionar tudo
+  let final = document.createElement("div");
+  final.classList.add("__config_base");
+  // adiciona tudo a div
+  final.append(config_base);
+
+  // seleciona a janela na DOOM
+  let window_cfg = document.querySelector('[data-app="config"');
+
+  let window_content = window_cfg.querySelector(".__window_content");
+
+  // seleciona o icon na DOOM
+  let cfg_icon = document.querySelector(
+    '.__task_bar_icon[data-target="config"'
+  );
+
+  // atribui o resultado a window config
+  window_content.innerHTML = final.innerHTML;
+
+  // inicia os listeners e funções do conteudo da config
+  if (config === "personalize") {
+    config_personalize();
+  }
+
+  // seleciona o botao de voltar ao menu principal
+  let button_back = window_content.querySelector(".__config_button_back");
+
+  button_back.addEventListener("click", () =>
+    configButtonBackHandler(window_content)
+  );
+  // foca a janela depois de adiciona-la a DOM
+  setTimeout(() => {
+    focus_window(window_cfg, cfg_icon);
+  }, 10);
+};
+
+const configInit = () => {
+  // Inicia os listeners de click de cada seção de config
+  document.querySelectorAll("[data-config]").forEach(config => {
+    config.addEventListener("click", () => {
+      configSelect(config.dataset.config);
+    });
+  });
+};
+
+module.exports = configInit;
+
+},{"./actions.js":1,"./window.js":8}],7:[function(require,module,exports){
 const date_time = document.getElementById("date_time");
 const week_days = [
   "segunda-feira",
@@ -244,87 +416,134 @@ setInterval(() => {
     date.getFullYear();
 }, 1000);
 
-document.querySelectorAll(".__task_bar_icon").forEach(icon => {
-  if (icon.id !== "_menu_icon") {
-    const target = icon.dataset.target;
-    const window = document.querySelector(`[data-app="${target}"]`);
+},{}],8:[function(require,module,exports){
+const createIcon = require("./icon.js");
 
-    if (target && window)
-      icon.addEventListener("click", () => minimize(window));
-  }
-});
+const createWindow = source => {
+  var configInit = require("./settings_system.js");
+  // inicia um aplicativo
+  const window_template = document.querySelector(`#${source}_template`);
 
-},{}],5:[function(require,module,exports){
-class Window {
-  constructor(elem, icon) {
-    // this.source = source;
-    this.elem = elem;
-    this.icon = icon;
-  }
+  // CRIA UMA DIV TEMPORARIA PRA INSERIR A JANELA
+  let window_tmp = document.createElement("div");
 
-  get() {
-    return this.elem;
-  }
+  window_tmp.innerHTML = document.querySelector(
+    "#blank_window_template"
+  ).textContent;
+  // coloca o titulo
+  window_tmp.querySelector("span").textContent = window_template.dataset.title;
+  // coloca o dataset app
+  window_tmp.querySelector("[data-app]").dataset.app = source;
+  // adiciona o conteudo do app na janela vazia
+  window_tmp.querySelector(".__window_content").innerHTML =
+    window_template.textContent;
 
-  focus_elem() {
-    if (this.elem.classList.contains("__window_minimized")) return;
-    this.elem.classList.add("focused");
-    this.icon.classList.add("focused");
+  // janela ja na DOM
+  var window = document
+    .querySelector("main")
+    .insertAdjacentElement("afterbegin", window_tmp.querySelector("div"));
 
-    document.querySelectorAll(".__window").forEach(window => {
-      if (window.dataset.app != this.elem.dataset.app) {
-        window.classList.remove("focused");
-        document
-          .querySelectorAll(`[data-target="${window.dataset.app}"]`)
-          .forEach(icon => {
-            icon.classList.remove("focused");
-          });
-      }
-    });
+  if (source == "projects") {
+    // adiciona o script do embemed do Twitter
+    var script = document.createElement("script");
+    script.src = "https://platform.twitter.com/widgets.js";
+    script.async = true;
+    document.head.appendChild(script);
+  } else if (source == "config") {
+    configInit();
   }
 
-  unfocus_elem() {
-    console.log("unfocus");
-    this.elem.classList.remove("focused");
-    this.icon.classList.remove("focused");
-  }
+  // CRIA O ICON
+  let icon = createIcon(source);
 
-  maximize() {
-    this.elem.classList.toggle("__window_fullscren");
-  }
+  // ADICIONAR OS LISTENERS
+  // seleciona a barra do topo
+  const top_bar = window.querySelector(".__window_top_bar");
 
-  minimize() {
-    this.elem.classList.toggle("__window_minimized");
+  // adiciona os listeners da barra do topo
+  top_bar
+    .querySelector("[data-minimize]")
+    .addEventListener("click", () => minimize(window, icon));
 
-    if (this.elem.classList.contains("__window_minimized")) {
-      this.unfocus_elem();
-    } else {
-      this.focus_elem();
-    }
-  }
+  top_bar
+    .querySelector("[data-maximize]")
+    .addEventListener("click", () => maximize(window, icon));
 
-  icon_click() {
-    if (this.elem.classList.contains("__window_minimized")) {
-      this.minimize();
-    } else {
-      if (this.elem.classList.contains("focused")) this.minimize();
-      else this.focus_elem();
-    }
-  }
-}
+  top_bar.querySelector("[data-close]").addEventListener("click", () => {
+    // remover da DOM
+    window.remove();
+    icon.remove();
+  });
 
-/* const maximize = e => {
-  e.classList.toggle("__window_fullscren");
+  // listeners da janela
+  window.addEventListener("click", () => focus_window(window, icon));
+
+  // ---- ICON
+  // listeners do icon na barra de tarefas
+  icon.addEventListener("click", () => icon_click(window, icon));
+
+  focus_window(window, icon);
+
+  return window;
 };
 
-const minimize = e => {
-  e.classList.toggle("__window_minimized");
+const focus_window = (window, icon) => {
+  // console.log("focus!", window, icon);
+  if (window.classList.contains("__window_minimized")) return;
+
+  icon.classList.add("focused");
+  window.classList.add("focused");
+  // last_focused mantem o ultimo elemento no topo da tela mesmo
+  // se for desfocado e nenhum outro for focado
+  window.classList.add("last_focused");
+
+  document.querySelectorAll(".__window").forEach(window2 => {
+    if (window.dataset.app != window2.dataset.app) {
+      window2.classList.remove("focused");
+      window2.classList.remove("last_focused");
+      document
+        .querySelectorAll(`[data-target="${window2.dataset.app}"]`)
+        .forEach(icon2 => {
+          icon2.classList.remove("focused");
+        });
+    }
+  });
 };
 
-module.exports = function () {
-  this.maximize = maximize;
-  this.minimize = minimize;
-}; */
-module.exports = { Window };
+const unfocus_window = (window, icon) => {
+  window.classList.remove("focused");
+  icon.classList.remove("focused");
+};
 
-},{}]},{},[2]);
+const maximize = window => {
+  window.classList.toggle("__window_fullscren");
+};
+
+const minimize = (window, icon) => {
+  window.classList.add("__window_minimized");
+
+  if (window.classList.contains("__window_minimized")) {
+    unfocus_window(window, icon);
+  }
+  /*   window.classList.toggle("__window_minimized");
+
+  if (window.classList.contains("__window_minimized")) {
+    unfocus_window(window, icon);
+  } else {
+    focus_window(window, icon);
+  } */
+};
+
+const icon_click = (window, icon) => {
+  if (window.classList.contains("__window_minimized")) {
+    window.classList.remove("__window_minimized");
+    focus_window(window, icon);
+  } else {
+    if (window.classList.contains("focused")) minimize(window, icon);
+    else focus_window(window, icon);
+  }
+};
+
+module.exports = { createWindow, focus_window };
+
+},{"./icon.js":3,"./settings_system.js":6}]},{},[4]);

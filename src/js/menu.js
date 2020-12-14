@@ -6,6 +6,7 @@ const menu_icon = document.getElementById("_menu_icon");
 const toggleMenu = () => {
   menu.classList.toggle("active");
   menu.classList.toggle("unactive");
+  menu_icon.classList.toggle("focused");
 };
 
 const menuListeners = () => {
@@ -17,6 +18,7 @@ const menuListeners = () => {
       !document.querySelector("#_menu_icon").contains(e.target)
     ) {
       menu.classList.remove("active");
+      menu_icon.classList.remove("focused");
       menu.classList.add("unactive");
     }
   });

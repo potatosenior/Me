@@ -1,9 +1,13 @@
 const { openApp } = require("./actions.js");
 
 const shortcuts = document.querySelectorAll(".__desktop_icon");
+const context_menu = document.querySelector("#__context_menu");
 
 const windowAndIconsFocusListener = () => {
-  document.querySelector(".__desktop").addEventListener("click", e => {
+  const desktop = document.querySelector(".__desktop");
+  // const html = document.querySelector("main");
+
+  desktop.addEventListener("click", e => {
     // desfoca as janelas e os icones na barra de tarefa se clicar fora dos mesmos
     let click_in_window = false;
     let click_in_icon = false;
@@ -41,6 +45,9 @@ const windowAndIconsFocusListener = () => {
       });
     }
 
+    if (!context_menu.contains(e.target))
+      context_menu.classList.remove("active");
+
     if (!click_in_window && !click_in_icon && !click_in_menu_item) {
       // se o clique nao foi em nenhum, desfocar todos
       console.log("unfocus all");
@@ -53,6 +60,22 @@ const windowAndIconsFocusListener = () => {
         icon.classList.remove("focused");
       });
     }
+  });
+
+  desktop.addEventListener("contextmenu", e => {
+    // TODO
+    // abrir o menu pra esquerda se estiver bem na direita
+    // abrir pra cima se estiver muito baixo
+    e.preventDefault(); // desativa o contextmenu padrao
+    context_menu.style.left = e.pageX + 1 + "px";
+    context_menu.style.top = e.pageY + 1 + "px";
+
+    if (context_menu.classList.contains("active")) {
+      return false;
+    }
+
+    context_menu.classList.toggle("active");
+    return false;
   });
 };
 

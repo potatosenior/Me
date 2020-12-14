@@ -1,4 +1,7 @@
-const { createElementFromHTML } = require("./actions.js");
+const {
+  createElementFromHTML,
+  getTaskbarIconElement,
+} = require("./actions.js");
 const { focus_window } = require("./window.js");
 
 const main = document.querySelector("main");
@@ -105,9 +108,7 @@ const configSelect = config => {
   let window_content = window_cfg.querySelector(".__window_content");
 
   // seleciona o icon na DOOM
-  let cfg_icon = document.querySelector(
-    '.__task_bar_icon[data-target="config"'
-  );
+  let cfg_icon = getTaskbarIconElement("config");
 
   // atribui o resultado a window config
   window_content.innerHTML = final.innerHTML;

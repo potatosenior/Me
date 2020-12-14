@@ -2,6 +2,7 @@ const createIcon = require("./icon.js");
 
 const createWindow = source => {
   var configInit = require("./settings_system.js");
+  var initTrashcan = require("./trashcan.js");
   // inicia um aplicativo
   const window_template = document.querySelector(`#${source}_template`);
 
@@ -32,6 +33,8 @@ const createWindow = source => {
     document.head.appendChild(script);
   } else if (source == "config") {
     configInit();
+  } else if (source == "trashcan") {
+    initTrashcan();
   }
 
   // CRIA O ICON
@@ -102,6 +105,7 @@ const maximize = window => {
 
 const minimize = (window, icon) => {
   window.classList.add("__window_minimized");
+  window.classList.remove("last_focused");
 
   if (window.classList.contains("__window_minimized")) {
     unfocus_window(window, icon);

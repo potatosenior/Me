@@ -54,3 +54,15 @@ setInterval(() => {
     " de " +
     date.getFullYear();
 }, 1000);
+
+const taskbarListeners = () => {
+  const task_bar = document.querySelector("task_bar");
+
+  task_bar.addEventListener("contextmenu", e => e.preventDefault());
+};
+
+const taskbarInit = () => {
+  taskbarListeners();
+};
+
+module.exports = taskbarInit;

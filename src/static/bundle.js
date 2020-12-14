@@ -1,24 +1,18 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-const { createWindow } = require("./window.js");
+const { createWindow, focus_window } = require("./window.js");
+
+const getTaskbarIconElement = source => {
+  return document.querySelector(`.__task_bar_icon[data-target='${source}']`);
+};
 
 const openApp = source => {
   const open = document.querySelector(`[data-app='${source}']`);
 
   if (open) {
     // app ja esta aberto, então foca o mesmo
-    open.classList.remove("__window_minimized");
-    open.classList.add("focused");
+    let icon = getTaskbarIconElement(source);
 
-    document
-      .querySelectorAll(".__window")
-      .forEach(window => window.classList.remove("last_focused"));
-
-    open.classList.add("last_focused");
-
-    document
-      .querySelectorAll(`[data-target='${source}']`)[1]
-      .classList.add("focused");
-
+    focus_window(open, icon);
     return;
   }
 
@@ -34,15 +28,19 @@ const createElementFromHTML = htmlString => {
   return div.firstChild;
 };
 
-module.exports = { createElementFromHTML, openApp };
+module.exports = { getTaskbarIconElement, createElementFromHTML, openApp };
 
-},{"./window.js":8}],2:[function(require,module,exports){
+},{"./window.js":9}],2:[function(require,module,exports){
 const { openApp } = require("./actions.js");
 
 const shortcuts = document.querySelectorAll(".__desktop_icon");
+const context_menu = document.querySelector("#__context_menu");
 
 const windowAndIconsFocusListener = () => {
-  document.querySelector(".__desktop").addEventListener("click", e => {
+  const desktop = document.querySelector(".__desktop");
+  // const html = document.querySelector("main");
+
+  desktop.addEventListener("click", e => {
     // desfoca as janelas e os icones na barra de tarefa se clicar fora dos mesmos
     let click_in_window = false;
     let click_in_icon = false;
@@ -80,6 +78,9 @@ const windowAndIconsFocusListener = () => {
       });
     }
 
+    if (!context_menu.contains(e.target))
+      context_menu.classList.remove("active");
+
     if (!click_in_window && !click_in_icon && !click_in_menu_item) {
       // se o clique nao foi em nenhum, desfocar todos
       console.log("unfocus all");
@@ -92,6 +93,22 @@ const windowAndIconsFocusListener = () => {
         icon.classList.remove("focused");
       });
     }
+  });
+
+  desktop.addEventListener("contextmenu", e => {
+    // TODO
+    // abrir o menu pra esquerda se estiver bem na direita
+    // abrir pra cima se estiver muito baixo
+    e.preventDefault(); // desativa o contextmenu padrao
+    context_menu.style.left = e.pageX + 1 + "px";
+    context_menu.style.top = e.pageY + 1 + "px";
+
+    if (context_menu.classList.contains("active")) {
+      return false;
+    }
+
+    context_menu.classList.toggle("active");
+    return false;
   });
 };
 
@@ -163,13 +180,14 @@ module.exports = createIcon;
 require("./settings_system.js");
 require("./actions.js");
 const desktop = require("./desktop.js");
-require("./task_bar.js");
+const task_bar = require("./task_bar.js");
 const menu = require("./menu.js");
 
 desktop();
+task_bar();
 menu();
 
-console.log("hello world!!");
+console.log("hello world!!!");
 
 },{"./actions.js":1,"./desktop.js":2,"./menu.js":5,"./settings_system.js":6,"./task_bar.js":7}],5:[function(require,module,exports){
 const { openApp } = require("./actions.js");
@@ -216,7 +234,10 @@ const menuInit = () => {
 module.exports = menuInit;
 
 },{"./actions.js":1}],6:[function(require,module,exports){
-const { createElementFromHTML } = require("./actions.js");
+const {
+  createElementFromHTML,
+  getTaskbarIconElement,
+} = require("./actions.js");
 const { focus_window } = require("./window.js");
 
 const main = document.querySelector("main");
@@ -323,9 +344,7 @@ const configSelect = config => {
   let window_content = window_cfg.querySelector(".__window_content");
 
   // seleciona o icon na DOOM
-  let cfg_icon = document.querySelector(
-    '.__task_bar_icon[data-target="config"'
-  );
+  let cfg_icon = getTaskbarIconElement("config");
 
   // atribui o resultado a window config
   window_content.innerHTML = final.innerHTML;
@@ -358,7 +377,7 @@ const configInit = () => {
 
 module.exports = configInit;
 
-},{"./actions.js":1,"./window.js":8}],7:[function(require,module,exports){
+},{"./actions.js":1,"./window.js":9}],7:[function(require,module,exports){
 const date_time = document.getElementById("date_time");
 const week_days = [
   "segunda-feira",
@@ -416,11 +435,96 @@ setInterval(() => {
     date.getFullYear();
 }, 1000);
 
+const taskbarListeners = () => {
+  const task_bar = document.querySelector("task_bar");
+
+  task_bar.addEventListener("contextmenu", e => e.preventDefault());
+};
+
+const taskbarInit = () => {
+  taskbarListeners();
+};
+
+module.exports = taskbarInit;
+
 },{}],8:[function(require,module,exports){
+const { openApp } = require("./actions.js");
+
+const oldPortofioListeners = () => {
+  /* 
+  detecta cliques dentro do iframe e foca a janela
+  help: https://stackoverflow.com/questions/2381336/detect-click-into-iframe-using-javascript
+  */
+  const iframe = document
+    .querySelector(".__old_portfolio")
+    .querySelector("iframe");
+
+  window.addEventListener("blur", () => {
+    if (document.activeElement === iframe) {
+      // simula um click na janela pra foca-la
+      document.querySelector('[data-app="old_portfolio"]').click();
+    }
+  });
+};
+
+const trashcanListeners = () => {
+  const trashcan = document.querySelector("#trashcan");
+  const items = trashcan.querySelectorAll("li");
+
+  trashcan.addEventListener("click", e => {
+    // adiciona um listener de click na lixeira para desfocar os items
+    // ao clicar fora de algum
+    let click_in_item = false;
+
+    items.forEach(item => {
+      // percorre todos items e verifica se o clique foi em algum
+      if (item.contains(e.target)) click_in_item = true;
+    });
+
+    if (!click_in_item) {
+      // se o clique nao foi em um item, desfoca todos
+      items.forEach(item => {
+        item.classList.remove("focused");
+      });
+    }
+  });
+
+  items.forEach(item => {
+    item.addEventListener("click", () => {
+      // adiciona a classe de focado e retira dos outros
+      items.forEach(item2 => {
+        item2.classList.remove("focused");
+      });
+
+      item.classList.add("focused");
+    });
+
+    item.addEventListener("dblclick", () => {
+      // abre o app
+      let source = item.dataset.target;
+
+      openApp(source);
+
+      if (source === "old_portfolio") {
+        // inicia funcoes do portfolio antigo
+        oldPortofioListeners();
+      }
+    });
+  });
+};
+
+const initTrashcan = () => {
+  trashcanListeners();
+};
+
+module.exports = initTrashcan;
+
+},{"./actions.js":1}],9:[function(require,module,exports){
 const createIcon = require("./icon.js");
 
 const createWindow = source => {
   var configInit = require("./settings_system.js");
+  var initTrashcan = require("./trashcan.js");
   // inicia um aplicativo
   const window_template = document.querySelector(`#${source}_template`);
 
@@ -451,6 +555,8 @@ const createWindow = source => {
     document.head.appendChild(script);
   } else if (source == "config") {
     configInit();
+  } else if (source == "trashcan") {
+    initTrashcan();
   }
 
   // CRIA O ICON
@@ -521,6 +627,7 @@ const maximize = window => {
 
 const minimize = (window, icon) => {
   window.classList.add("__window_minimized");
+  window.classList.remove("last_focused");
 
   if (window.classList.contains("__window_minimized")) {
     unfocus_window(window, icon);
@@ -546,4 +653,4 @@ const icon_click = (window, icon) => {
 
 module.exports = { createWindow, focus_window };
 
-},{"./icon.js":3,"./settings_system.js":6}]},{},[4]);
+},{"./icon.js":3,"./settings_system.js":6,"./trashcan.js":8}]},{},[4]);

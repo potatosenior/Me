@@ -161,6 +161,7 @@ svg {
 
 .__window_minimized {
   transform: scale(0);
+  z-index: -1000 !important;
 }
 
 .__window_top_bar {
@@ -388,15 +389,52 @@ task_bar {
   cursor: default;
 }
 
+/* ---------------------- CONTEXT MENU  */
+#__context_menu {
+  position: absolute;
+  display: flex;
+  left: 0;
+  top: 0;
+  width: 150px;
+  /* height: 120px; */
+  background-color: #212121b4;
+  overflow: hidden;
+  transform: scale(0);
+  transition: transform 0.3s;
+  transform-origin: top left;
+}
+
+#__context_menu ul {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+}
+
+#__context_menu li {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  height: 30px;
+  width: 100%;
+  color: white;
+  font-weight: 100;
+  transition: background-color 0.3s;
+  cursor: pointer;
+}
+
+#__context_menu li:hover {
+  background-color: hsla(0, 0%, 78.4%, 0.3);
+}
+
+#__context_menu.active {
+  z-index: 1000;
+  transform: scale(1);
+}
 /* ---------------------- OUTROS */
 .row {
   display: flex;
   flex-direction: row;
-}
-
-.column {
-  display: flex;
-  flex-direction: column;
 }
 
 /* ---------------------- SCROLL BAR */
@@ -930,6 +968,10 @@ task_bar {
   cursor: pointer;
 }
 
+.__trashcan li.focused {
+  background-color: hsla(0, 0%, 78.4%, 0.2);
+}
+
 .__trashcan li:hover {
   background-color: hsla(0, 0%, 78.4%, 0.3);
 }
@@ -938,6 +980,21 @@ task_bar {
   flex-basis: 33%;
   padding: 5px 10px;
   font-weight: 100;
+}
+
+/* ---------------------------- PORFOLIO ANTIGO  */
+[data-app="old_portfolio"] {
+  transform: scale(1) !important;
+}
+.__old_portfolio {
+  position: absolute;
+  padding: 0px !important;
+  width: 100%;
+}
+.__old_portfolio iframe {
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 
 /* ------------------------ ANIMATIONS  */

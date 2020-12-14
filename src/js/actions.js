@@ -1,23 +1,17 @@
-const { createWindow } = require("./window.js");
+const { createWindow, focus_window } = require("./window.js");
+
+const getTaskbarIconElement = source => {
+  return document.querySelector(`.__task_bar_icon[data-target='${source}']`);
+};
 
 const openApp = source => {
   const open = document.querySelector(`[data-app='${source}']`);
 
   if (open) {
     // app ja esta aberto, então foca o mesmo
-    open.classList.remove("__window_minimized");
-    open.classList.add("focused");
+    let icon = getTaskbarIconElement(source);
 
-    document
-      .querySelectorAll(".__window")
-      .forEach(window => window.classList.remove("last_focused"));
-
-    open.classList.add("last_focused");
-
-    document
-      .querySelectorAll(`[data-target='${source}']`)[1]
-      .classList.add("focused");
-
+    focus_window(open, icon);
     return;
   }
 
@@ -33,4 +27,4 @@ const createElementFromHTML = htmlString => {
   return div.firstChild;
 };
 
-module.exports = { createElementFromHTML, openApp };
+module.exports = { getTaskbarIconElement, createElementFromHTML, openApp };

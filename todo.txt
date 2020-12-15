@@ -1,0 +1,4 @@
+desfocar tudo se clicar com o botao direito do mouse no desktop
+
+criar uma funcao generica pra executar outra 
+funcao quando usuario clicar ou abrir o contextmenu

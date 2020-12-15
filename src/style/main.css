@@ -35,6 +35,41 @@ svg {
   fill: white;
 }
 
+#__logon_animation {
+  /* src: https://freefrontend.com/css-animated-backgrounds/  */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  transition: transform 0.1s;
+  overflow: hidden;
+
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation-duration: 3s;
+  animation: gradient 3s ease;
+}
+
+#__logon_animation span {
+  color: white;
+  font-weight: 400;
+  font-size: 2.3rem;
+  margin-bottom: 30px;
+}
+
+#__logon_animation i {
+  color: white;
+}
+
+#__logon_animation.unactive {
+  /* z-index: -1000; */
+  transform: scale(0);
+}
+
 .__link_in_text {
   font-size: inherit !important;
   font-weight: bold !important;
@@ -59,10 +94,10 @@ svg {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 80px;
+  width: 60px;
   padding: 8px;
-  margin-left: 10px;
-  margin-top: 15px;
+  margin-left: 5px;
+  margin-top: 5px;
   border: solid 1px transparent;
   border-radius: 2px;
   cursor: pointer;
@@ -101,7 +136,7 @@ svg {
 .__desktop_icon span {
   overflow: hidden;
   text-align: center;
-  font-size: 17px;
+  font-size: 13px;
   font-weight: 400;
   color: whitesmoke;
   text-shadow: 0 0 2px #000; /* horizontal-offset vertical-offset 'blur' colour */
@@ -123,10 +158,10 @@ svg {
   width: 50%;
   height: 500px;
   max-height: 500px;
-  z-index: 1;
+  z-index: 10;
   top: 20%;
-  left: calc(25%);
-  transition: transform 0.2s, width 0.3s, top 0.3s, left 0.3s, height 0.3s;
+  left: 25%;
+  transition: transform 0.1s, width 0.1s, height 0.1s;
   transform-origin: bottom left;
   /* overflow: hidden; */
 
@@ -136,7 +171,7 @@ svg {
 }
 
 .__window.focused {
-  z-index: 1000;
+  z-index: 1000 !important;
 }
 
 .__window.last_focused {
@@ -1040,5 +1075,17 @@ task_bar {
   }
   50% {
     border-color: white;
+  }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }

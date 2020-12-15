@@ -5,6 +5,7 @@ const context_menu = document.querySelector("#__context_menu");
 
 const contextMenuListener = () => {
   const items = context_menu.querySelectorAll("li");
+  const { animateDesktopShortcuts } = require("./animations.js");
 
   items.forEach(item => {
     item.addEventListener("click", () => {
@@ -61,7 +62,6 @@ const unfocusAll = e => {
 
   if (!click_in_window && !click_in_icon && !click_in_menu_item) {
     // se o clique nao foi em nenhum, desfocar todos
-    console.log("unfocus all");
 
     windows.forEach(window => {
       window.classList.remove("focused");
@@ -100,25 +100,6 @@ const windowAndIconsFocusListeners = () => {
   });
 };
 
-const animateDesktopShortcuts = () => {
-  // faz a animação dos icones da área de trabalho
-  let time = 100;
-
-  shortcuts.forEach(shortcut => {
-    setTimeout(() => {
-      // faz a animação
-      shortcut.classList.add("animate");
-    }, time);
-    time += 40;
-
-    setTimeout(() => {
-      // remove a classe de animaçao para poder animar novamente
-      shortcut.classList.remove("animate");
-    }, time * 2);
-    time += 40;
-  });
-};
-
 const desktopShortcutsListeners = () => {
   shortcuts.forEach(shortcut => {
     // INICIALIZA OS ATALHOS NA AREA DE TRABALHO
@@ -142,7 +123,6 @@ const desktopShortcutsListeners = () => {
 };
 
 const desktopInit = () => {
-  animateDesktopShortcuts();
   contextMenuListener();
   windowAndIconsFocusListeners();
   desktopShortcutsListeners();

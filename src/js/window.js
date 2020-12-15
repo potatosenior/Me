@@ -1,4 +1,5 @@
 const createIcon = require("./icon.js");
+var pill = [];
 
 const createWindow = source => {
   var configInit = require("./settings_system.js");
@@ -54,6 +55,8 @@ const createWindow = source => {
     .addEventListener("click", () => maximize(window, icon));
 
   top_bar.querySelector("[data-close]").addEventListener("click", () => {
+    // remove da pilhar
+    pill.splice(pill.indexOf(window), 1);
     // remover da DOM
     window.remove();
     icon.remove();
@@ -62,6 +65,7 @@ const createWindow = source => {
   // listeners da janela
   window.addEventListener("click", () => focus_window(window, icon));
   window.addEventListener("contextmenu", e => e.preventDefault());
+  dragElement(window);
 
   // ---- ICON
   // listeners do icon na barra de tarefas
@@ -69,11 +73,88 @@ const createWindow = source => {
 
   focus_window(window, icon);
 
+  pill.unshift(window);
+
   return window;
 };
 
+function dragElement(elmnt) {
+  // help: https://www.w3schools.com/howto/howto_js_draggable.asp
+  var pos1 = 0,
+    pos2 = 0,
+    pos3 = 0,
+    pos4 = 0;
+
+  // Listener para quando usuario mover a topBar
+  elmnt
+    .querySelector(".__window_top_bar")
+    .querySelector("span").onmousedown = dragMouseDown;
+
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+
+    let newX = elmnt.offsetLeft - pos1;
+    let newY = elmnt.offsetTop - pos2;
+
+    // evita da janela sair do campo de visão
+    if (
+      newX >= -elmnt.offsetWidth / 2 &&
+      newY >= 0 &&
+      newX < window.innerWidth - elmnt.offsetWidth / 2 &&
+      newY < window.innerHeight - elmnt.offsetHeight / 2
+    ) {
+      elmnt.style.top = newY + "px";
+      elmnt.style.left = newX + "px";
+    }
+  }
+
+  function closeDragElement() {
+    // stop moving when mouse button is released:
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}
+
+const organize_pill = wind => {
+  /* 
+  Coloca a ultima janela focada no topo da pilha e depois
+  percorre a pilha adiciona um zIndex de acordo com a posicao na pilha
+  sendo a posicao 0 o topo 
+  */
+  if (pill) {
+    let idx = pill.indexOf(wind);
+
+    // verifica se o elemento já esta na pilha
+    if (idx >= 0) {
+      // remove o elemento e o adiciona de volto no topo
+      pill.splice(pill.indexOf(wind), 1);
+      pill.unshift(wind);
+    }
+    // aplica os Z-index
+    pill.forEach((item, index) => {
+      item.style.zIndex = 100 - index;
+    });
+  }
+};
+
 const focus_window = (window, icon) => {
-  // console.log("focus!", window, icon);
   if (window.classList.contains("__window_minimized")) return;
 
   icon.classList.add("focused");
@@ -81,6 +162,8 @@ const focus_window = (window, icon) => {
   // last_focused mantem o ultimo elemento no topo da tela mesmo
   // se for desfocado e nenhum outro for focado
   window.classList.add("last_focused");
+
+  organize_pill(window);
 
   document.querySelectorAll(".__window").forEach(window2 => {
     if (window.dataset.app != window2.dataset.app) {
@@ -111,13 +194,6 @@ const minimize = (window, icon) => {
   if (window.classList.contains("__window_minimized")) {
     unfocus_window(window, icon);
   }
-  /*   window.classList.toggle("__window_minimized");
-
-  if (window.classList.contains("__window_minimized")) {
-    unfocus_window(window, icon);
-  } else {
-    focus_window(window, icon);
-  } */
 };
 
 const icon_click = (window, icon) => {

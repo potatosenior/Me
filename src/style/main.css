@@ -395,7 +395,7 @@ task_bar {
   display: flex;
   left: 0;
   top: 0;
-  width: 150px;
+  width: 200px;
   /* height: 120px; */
   background-color: #212121b4;
   overflow: hidden;
@@ -982,7 +982,7 @@ task_bar {
   font-weight: 100;
 }
 
-/* ---------------------------- PORFOLIO ANTIGO  */
+/* ---------------------------- OLD PORTFOLIO  */
 [data-app="old_portfolio"] {
   transform: scale(1) !important;
 }
@@ -1007,7 +1007,7 @@ task_bar {
   font-weight: 500;
   color: white;
   opacity: 0.2;
-  z-index: 10000;
+  z-index: 0;
 }
 
 /* ------------------------ ANIMATIONS  */

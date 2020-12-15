@@ -61,6 +61,7 @@ const createWindow = source => {
 
   // listeners da janela
   window.addEventListener("click", () => focus_window(window, icon));
+  window.addEventListener("contextmenu", e => e.preventDefault());
 
   // ---- ICON
   // listeners do icon na barra de tarefas

@@ -23,6 +23,17 @@ const menuListeners = () => {
     }
   });
 
+  document.querySelector("html").addEventListener("contextmenu", e => {
+    if (
+      !document.querySelector("#_menu").contains(e.target) &&
+      !document.querySelector("#_menu_icon").contains(e.target)
+    ) {
+      menu.classList.remove("active");
+      menu_icon.classList.remove("focused");
+      menu.classList.add("unactive");
+    }
+  });
+
   menu_icon.addEventListener("click", () => {
     toggleMenu();
   });

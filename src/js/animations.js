@@ -1,4 +1,4 @@
-const logonAnimationDurations = 1000;
+const logonAnimationDurations = 2000;
 
 const loadingSystemAnimation = () => {
   const logon_animation = document.querySelector("#__logon_animation");

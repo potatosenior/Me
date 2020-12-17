@@ -54,7 +54,7 @@ module.exports = {
 };
 
 },{"./animations.js":2,"./icon.js":5,"./window.js":11}],2:[function(require,module,exports){
-const logonAnimationDurations = 1000;
+const logonAnimationDurations = 2000;
 
 const loadingSystemAnimation = () => {
   const logon_animation = document.querySelector("#__logon_animation");

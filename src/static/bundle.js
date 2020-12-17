@@ -1,5 +1,11 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-const { createWindow, focus_window } = require("./window.js");
+const {
+  createWindow,
+  focus_window,
+  destroyAllWindows,
+} = require("./window.js");
+const { destroyAllIcons } = require("./icon.js");
+const { logonAnimations } = require("./animations.js");
 
 const getTaskbarIconElement = source => {
   return document.querySelector(`.__task_bar_icon[data-target='${source}']`);
@@ -28,9 +34,26 @@ const createElementFromHTML = htmlString => {
   return div.firstChild;
 };
 
-module.exports = { getTaskbarIconElement, createElementFromHTML, openApp };
+const restartSystem = () => {
+  logonAnimations();
+  // fecha o menu iniciar
+  document.getElementById("_menu").classList.remove("active");
+  document.getElementById("_menu").classList.add("unactive");
+  document.getElementById("_menu_icon").classList.remove("focused");
+  // destroi todas janelas
+  destroyAllWindows();
+  // destroi todos icons
+  destroyAllIcons();
+};
 
-},{"./window.js":10}],2:[function(require,module,exports){
+module.exports = {
+  getTaskbarIconElement,
+  createElementFromHTML,
+  openApp,
+  restartSystem,
+};
+
+},{"./animations.js":2,"./icon.js":5,"./window.js":11}],2:[function(require,module,exports){
 const logonAnimationDurations = 1000;
 
 const loadingSystemAnimation = () => {
@@ -76,12 +99,8 @@ module.exports = {
 };
 
 },{}],3:[function(require,module,exports){
-const { openApp } = require("./actions.js");
-
-const shortcuts = document.querySelectorAll(".__desktop_icon");
-const context_menu = document.querySelector("#__context_menu");
-
-const contextMenuListener = () => {
+const desktopContextMenuListener = () => {
+  const context_menu = document.querySelector("#__context_menu");
   const items = context_menu.querySelectorAll("li");
   const { animateDesktopShortcuts } = require("./animations.js");
 
@@ -96,75 +115,32 @@ const contextMenuListener = () => {
       context_menu.classList.remove("active");
     });
   });
+
+  document.addEventListener("click", e => {
+    if (!context_menu.contains(e.target))
+      context_menu.classList.remove("active");
+  });
 };
 
-const unfocusAll = e => {
-  // desfoca elementos focados que nao foram clicados
-  let click_in_window = false;
-  let click_in_icon = false;
-  let click_in_menu_item = false;
-  let click_in_shortcut = false;
-  let menu_items = document.querySelector("#_menu").querySelectorAll("li");
-  let windows = document.querySelectorAll(".__window");
-  let icons = document.querySelectorAll(`.__task_bar_icon[data-target]`);
+module.exports = { desktopContextMenuListener };
 
-  windows.forEach(window => {
-    // percorre todas janelas e verifica se o clique foi em alguma
-    if (window.contains(e.target)) click_in_window = true;
-  });
+},{"./animations.js":2}],4:[function(require,module,exports){
+const { openApp } = require("./actions.js");
+const { desktopContextMenuListener } = require("./context_menu.js");
 
-  icons.forEach(icon => {
-    // percorre todos icones e verifica se o clique foi em algum
-    if (icon.contains(e.target)) click_in_icon = true;
-  });
-
-  menu_items.forEach(item => {
-    // percorre todos items do menu
-    // tem que fazer isso pra evitar que a janela de config nao abra desfocada
-    if (item.contains(e.target)) click_in_menu_item = true;
-  });
-
-  shortcuts.forEach(shortcut => {
-    // percorre todos atalhos
-    if (shortcut.contains(e.target)) click_in_shortcut = true;
-  });
-
-  if (!click_in_shortcut) {
-    // desfoca todos atalhos se o click nao foi em algum
-    shortcuts.forEach(shortcut => {
-      shortcut.classList.remove("focused");
-    });
-  }
-
-  if (!context_menu.contains(e.target)) context_menu.classList.remove("active");
-
-  if (!click_in_window && !click_in_icon && !click_in_menu_item) {
-    // se o clique nao foi em nenhum, desfocar todos
-
-    windows.forEach(window => {
-      window.classList.remove("focused");
-    });
-
-    icons.forEach(icon => {
-      icon.classList.remove("focused");
-    });
-  }
-};
-
-const windowAndIconsFocusListeners = () => {
+const desktopMenuContextListener = () => {
+  /* 
+    Adiciona o listener de menucontext do desktop
+  */
   const desktop = document.querySelector(".__desktop");
-  const main = document.querySelector("main");
-
-  main.addEventListener("click", e => {
-    unfocusAll(e);
-  });
 
   desktop.addEventListener("contextmenu", e => {
     // TODO
     // abrir o menu pra esquerda se estiver bem na direita
     // abrir pra cima se estiver muito baixo
     e.preventDefault(); // desativa o contextmenu padrao
-    unfocusAll(e);
+    const context_menu = document.querySelector("#__context_menu");
+
     context_menu.style.left = e.pageX + 1 + "px";
     context_menu.style.top = e.pageY + 1 + "px";
 
@@ -179,6 +155,8 @@ const windowAndIconsFocusListeners = () => {
 };
 
 const desktopShortcutsListeners = () => {
+  const shortcuts = document.querySelectorAll(".__desktop_icon");
+
   shortcuts.forEach(shortcut => {
     // INICIALIZA OS ATALHOS NA AREA DE TRABALHO
     // adiciona o listener de clck para focar o shortcut
@@ -198,17 +176,53 @@ const desktopShortcutsListeners = () => {
       openApp(source);
     });
   });
+
+  const unfocusShortcuts = e => {
+    /* desfoca todos atalhos da area de trabalho e o evento
+    nao foi em algum deles
+    */
+    let click_in_shortcut = false;
+
+    shortcuts.forEach(shortcut => {
+      // percorre todos atalhos
+      if (shortcut.contains(e.target)) click_in_shortcut = true;
+    });
+
+    if (!click_in_shortcut) {
+      // desfoca todos atalhos se o click nao foi em algum
+      shortcuts.forEach(shortcut => {
+        shortcut.classList.remove("focused");
+      });
+    }
+  };
+
+  document.addEventListener("click", e => unfocusShortcuts(e));
+  document.addEventListener("contextmenu", e => {
+    e.preventDefault();
+    unfocusShortcuts(e);
+
+    let click_in_shortcut = false;
+
+    shortcuts.forEach(shortcut => {
+      // percorre todos atalhos
+      if (shortcut.contains(e.target)) click_in_shortcut = true;
+    });
+
+    if (click_in_shortcut) {
+      console.log("contextmenu in shortcut");
+    }
+  });
 };
 
 const desktopInit = () => {
-  contextMenuListener();
-  windowAndIconsFocusListeners();
+  desktopContextMenuListener();
+  desktopMenuContextListener();
   desktopShortcutsListeners();
 };
 
 module.exports = desktopInit;
 
-},{"./actions.js":1,"./animations.js":2}],4:[function(require,module,exports){
+},{"./actions.js":1,"./context_menu.js":3}],5:[function(require,module,exports){
 const icons = document.querySelectorAll(".__desktop_icon");
 
 const createIcon = source => {
@@ -230,31 +244,44 @@ const createIcon = source => {
     icon.classList.remove("focused");
   });
 
+  icon_in_doom.addEventListener("contextmenu", e => {
+    console.log("context menu in taskbar icon");
+    e.preventDefault();
+  });
+
   return icon_in_doom;
 };
 
-module.exports = createIcon;
+const destroyAllIcons = () => {
+  document.querySelectorAll(".__task_bar_icon").forEach(icon => {
+    if (!icon.classList.contains("menu_icon")) icon.remove();
+  });
+};
+module.exports = { createIcon, destroyAllIcons };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 require("./settings_system.js");
 require("./actions.js");
 const desktop = require("./desktop.js");
 const task_bar = require("./task_bar.js");
 const menu = require("./menu.js");
 const { logonAnimations } = require("./animations.js");
+const { windowsAndIconsListeners } = require("./window.js");
 
 logonAnimations();
 desktop();
 task_bar();
 menu();
+windowsAndIconsListeners();
 
 console.log("hello world!!!");
 
-},{"./actions.js":1,"./animations.js":2,"./desktop.js":3,"./menu.js":6,"./settings_system.js":7,"./task_bar.js":8}],6:[function(require,module,exports){
-const { openApp } = require("./actions.js");
+},{"./actions.js":1,"./animations.js":2,"./desktop.js":4,"./menu.js":7,"./settings_system.js":8,"./task_bar.js":9,"./window.js":11}],7:[function(require,module,exports){
+const { openApp, restartSystem } = require("./actions.js");
 
 const menu = document.getElementById("_menu");
 const menu_icon = document.getElementById("_menu_icon");
+const power_button = document.getElementById("power");
 
 const toggleMenu = () => {
   menu.classList.toggle("active");
@@ -299,6 +326,32 @@ const menuListeners = () => {
       openApp(source);
     });
   });
+
+  power_button.addEventListener("click", () => {
+    // reinicia o sistema
+    restartSystem();
+  });
+
+  // adiciona cor de fundo ao icone de power ao passar o mouse
+  // em cima do texto de Desligar
+  document
+    .querySelector(".__menu_power_text")
+    .addEventListener("mouseover", e => {
+      document
+        .querySelector(".__menu_power")
+        .querySelector("svg")
+        .classList.add("hover");
+    });
+
+  // remove a cor de fudno
+  document
+    .querySelector(".__menu_power_text")
+    .addEventListener("mouseout", e => {
+      document
+        .querySelector(".__menu_power")
+        .querySelector("svg")
+        .classList.remove("hover");
+    });
 };
 
 const menuInit = () => {
@@ -307,7 +360,7 @@ const menuInit = () => {
 
 module.exports = menuInit;
 
-},{"./actions.js":1}],7:[function(require,module,exports){
+},{"./actions.js":1}],8:[function(require,module,exports){
 const {
   createElementFromHTML,
   getTaskbarIconElement,
@@ -451,7 +504,7 @@ const configInit = () => {
 
 module.exports = configInit;
 
-},{"./actions.js":1,"./window.js":10}],8:[function(require,module,exports){
+},{"./actions.js":1,"./window.js":11}],9:[function(require,module,exports){
 const date_time = document.getElementById("date_time");
 const week_days = [
   "segunda-feira",
@@ -521,7 +574,7 @@ const taskbarInit = () => {
 
 module.exports = taskbarInit;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 const { openApp } = require("./actions.js");
 
 const oldPortofioListeners = () => {
@@ -593,8 +646,8 @@ const initTrashcan = () => {
 
 module.exports = initTrashcan;
 
-},{"./actions.js":1}],10:[function(require,module,exports){
-const createIcon = require("./icon.js");
+},{"./actions.js":1}],11:[function(require,module,exports){
+const { createIcon } = require("./icon.js");
 var pill = [];
 
 const createWindow = source => {
@@ -660,21 +713,80 @@ const createWindow = source => {
 
   // listeners da janela
   window.addEventListener("click", () => focus_window(window, icon));
-  window.addEventListener("contextmenu", e => e.preventDefault());
+  window.addEventListener("contextmenu", e => {
+    // foca a janela se clicar com o botao direito
+    e.preventDefault();
+    focus_window(window, icon);
+  });
   dragElement(window);
 
   // ---- ICON
   // listeners do icon na barra de tarefas
   icon.addEventListener("click", () => icon_click(window, icon));
+  icon.addEventListener("contextmenu", e => {
+    // foca a janela se clicar com o botao direito
+    e.preventDefault();
+    focus_window(window, icon);
+  });
 
   focus_window(window, icon);
 
+  // adiciona a janela no topo da pilha
   pill.unshift(window);
 
   return window;
 };
 
-function dragElement(elmnt) {
+const windowsAndIconsListeners = () => {
+  /* 
+    adiciona um listener para qualquer click ou contextmenu 
+    que se nao for em uma janela vai desfocar todas
+  */
+  function unfocusWindowsAndIcons(e) {
+    let click_in_window = false;
+    let click_in_icon = false;
+    let click_in_menu_item = false;
+    let menu_items = document.querySelector("#_menu").querySelectorAll("li");
+    let windows = document.querySelectorAll(".__window");
+    let icons = document.querySelectorAll(`.__task_bar_icon[data-target]`);
+
+    windows.forEach(window => {
+      // percorre todas janelas e verifica se o clique foi em alguma
+      if (window.contains(e.target)) click_in_window = true;
+    });
+
+    icons.forEach(icon => {
+      // percorre todos icones e verifica se o clique foi em algum
+      if (icon.contains(e.target)) click_in_icon = true;
+    });
+
+    menu_items.forEach(item => {
+      // Verifica e o clique foi em um item do menu
+      // tem que fazer isso pra evitar que a janela
+      // de config nao abra desfocada
+      if (item.contains(e.target)) click_in_menu_item = true;
+    });
+
+    if (!click_in_window && !click_in_icon && !click_in_menu_item) {
+      // se o clique nao fr em uma janela ou icon, desfoca todas
+      windows.forEach(window => {
+        window.classList.remove("focused");
+      });
+
+      icons.forEach(icon => {
+        icon.classList.remove("focused");
+      });
+    }
+  }
+  document.addEventListener("click", e => {
+    unfocusWindowsAndIcons(e);
+  });
+  document.addEventListener("contextmenu", e => {
+    unfocusWindowsAndIcons(e);
+  });
+};
+
+const dragElement = elmnt => {
   // help: https://www.w3schools.com/howto/howto_js_draggable.asp
   var pos1 = 0,
     pos2 = 0,
@@ -726,7 +838,7 @@ function dragElement(elmnt) {
     document.onmouseup = null;
     document.onmousemove = null;
   }
-}
+};
 
 const organize_pill = wind => {
   /* 
@@ -748,6 +860,17 @@ const organize_pill = wind => {
       item.style.zIndex = 100 - index;
     });
   }
+};
+
+const destroyAllWindows = () => {
+  /* 
+  Remove todas janelas e icones do documento
+  */
+  document.querySelectorAll(".__window").forEach(elem => {
+    elem.remove();
+  });
+
+  pill = [];
 };
 
 const focus_window = (window, icon) => {
@@ -802,6 +925,11 @@ const icon_click = (window, icon) => {
   }
 };
 
-module.exports = { createWindow, focus_window };
+module.exports = {
+  createWindow,
+  focus_window,
+  destroyAllWindows,
+  windowsAndIconsListeners,
+};
 
-},{"./icon.js":4,"./settings_system.js":7,"./trashcan.js":9}]},{},[5]);
+},{"./icon.js":5,"./settings_system.js":8,"./trashcan.js":10}]},{},[6]);

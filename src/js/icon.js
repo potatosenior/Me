@@ -19,7 +19,17 @@ const createIcon = source => {
     icon.classList.remove("focused");
   });
 
+  icon_in_doom.addEventListener("contextmenu", e => {
+    console.log("context menu in taskbar icon");
+    e.preventDefault();
+  });
+
   return icon_in_doom;
 };
 
-module.exports = createIcon;
+const destroyAllIcons = () => {
+  document.querySelectorAll(".__task_bar_icon").forEach(icon => {
+    if (!icon.classList.contains("menu_icon")) icon.remove();
+  });
+};
+module.exports = { createIcon, destroyAllIcons };

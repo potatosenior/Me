@@ -76,10 +76,6 @@ svg {
   color: rgb(129, 63, 252) !important;
 }
 
-/* .__window_fullscren .__link_in_text {
-  font-size: 1re;
-} */
-
 /* -------------------------- DESKTOP 
  */
 .__desktop {
@@ -332,7 +328,7 @@ svg {
 }
 
 .__menu_item:hover {
-  background-color: rgba(255, 255, 255, 0.541);
+  background-color: hsla(0, 0%, 78.4%, 0.3);
   cursor: pointer;
 }
 
@@ -340,24 +336,57 @@ svg {
   margin-left: 10px;
 }
 /* ----------------- SEARCH BAR  */
-.__menu_search {
+.__menu_power {
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 5px;
   margin-top: auto;
+  transition: background-color 0.3s;
+  border-radius: 5px;
 }
 
-.__menu_search svg {
+.__menu_power svg {
+  padding: 10px;
   cursor: pointer;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
 }
 
-.__menu_search input {
-  height: 90%;
-  max-width: 80%;
-  margin-left: 10px;
-  outline: none;
+.__menu_power svg.hover {
+  background-color: hsla(0, 0%, 78.4%, 0.3);
 }
+
+.__menu_power svg:hover {
+  background-color: hsla(0, 0%, 78.4%, 0.3);
+}
+
+.__menu_power svg:hover + span {
+  background-color: hsla(0, 0%, 78.4%, 0.3);
+  max-width: 70%;
+}
+
+.__menu_power span {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  outline: none;
+  overflow: hidden;
+  max-width: 0%;
+  transition: max-width 0.5s;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.__menu_power span:hover {
+  max-width: 70%;
+  background-color: hsla(0, 0%, 78.4%, 0.3);
+}
+
+.__menu_power span:hover .__menu_power svg {
+  background-color: hsla(0, 0%, 78.4%, 0.3);
+}
+
 /* ------------------------ BARRA DE TAREFAS */
 task_bar {
   display: flex;

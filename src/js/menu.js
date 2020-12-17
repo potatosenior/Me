@@ -1,7 +1,8 @@
-const { openApp } = require("./actions.js");
+const { openApp, restartSystem } = require("./actions.js");
 
 const menu = document.getElementById("_menu");
 const menu_icon = document.getElementById("_menu_icon");
+const power_button = document.getElementById("power");
 
 const toggleMenu = () => {
   menu.classList.toggle("active");
@@ -46,6 +47,32 @@ const menuListeners = () => {
       openApp(source);
     });
   });
+
+  power_button.addEventListener("click", () => {
+    // reinicia o sistema
+    restartSystem();
+  });
+
+  // adiciona cor de fundo ao icone de power ao passar o mouse
+  // em cima do texto de Desligar
+  document
+    .querySelector(".__menu_power_text")
+    .addEventListener("mouseover", e => {
+      document
+        .querySelector(".__menu_power")
+        .querySelector("svg")
+        .classList.add("hover");
+    });
+
+  // remove a cor de fudno
+  document
+    .querySelector(".__menu_power_text")
+    .addEventListener("mouseout", e => {
+      document
+        .querySelector(".__menu_power")
+        .querySelector("svg")
+        .classList.remove("hover");
+    });
 };
 
 const menuInit = () => {

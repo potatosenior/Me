@@ -1,4 +1,4 @@
-const createIcon = require("./icon.js");
+const { createIcon } = require("./icon.js");
 var pill = [];
 
 const createWindow = source => {
@@ -64,21 +64,80 @@ const createWindow = source => {
 
   // listeners da janela
   window.addEventListener("click", () => focus_window(window, icon));
-  window.addEventListener("contextmenu", e => e.preventDefault());
+  window.addEventListener("contextmenu", e => {
+    // foca a janela se clicar com o botao direito
+    e.preventDefault();
+    focus_window(window, icon);
+  });
   dragElement(window);
 
   // ---- ICON
   // listeners do icon na barra de tarefas
   icon.addEventListener("click", () => icon_click(window, icon));
+  icon.addEventListener("contextmenu", e => {
+    // foca a janela se clicar com o botao direito
+    e.preventDefault();
+    focus_window(window, icon);
+  });
 
   focus_window(window, icon);
 
+  // adiciona a janela no topo da pilha
   pill.unshift(window);
 
   return window;
 };
 
-function dragElement(elmnt) {
+const windowsAndIconsListeners = () => {
+  /* 
+    adiciona um listener para qualquer click ou contextmenu 
+    que se nao for em uma janela vai desfocar todas
+  */
+  function unfocusWindowsAndIcons(e) {
+    let click_in_window = false;
+    let click_in_icon = false;
+    let click_in_menu_item = false;
+    let menu_items = document.querySelector("#_menu").querySelectorAll("li");
+    let windows = document.querySelectorAll(".__window");
+    let icons = document.querySelectorAll(`.__task_bar_icon[data-target]`);
+
+    windows.forEach(window => {
+      // percorre todas janelas e verifica se o clique foi em alguma
+      if (window.contains(e.target)) click_in_window = true;
+    });
+
+    icons.forEach(icon => {
+      // percorre todos icones e verifica se o clique foi em algum
+      if (icon.contains(e.target)) click_in_icon = true;
+    });
+
+    menu_items.forEach(item => {
+      // Verifica e o clique foi em um item do menu
+      // tem que fazer isso pra evitar que a janela
+      // de config nao abra desfocada
+      if (item.contains(e.target)) click_in_menu_item = true;
+    });
+
+    if (!click_in_window && !click_in_icon && !click_in_menu_item) {
+      // se o clique nao fr em uma janela ou icon, desfoca todas
+      windows.forEach(window => {
+        window.classList.remove("focused");
+      });
+
+      icons.forEach(icon => {
+        icon.classList.remove("focused");
+      });
+    }
+  }
+  document.addEventListener("click", e => {
+    unfocusWindowsAndIcons(e);
+  });
+  document.addEventListener("contextmenu", e => {
+    unfocusWindowsAndIcons(e);
+  });
+};
+
+const dragElement = elmnt => {
   // help: https://www.w3schools.com/howto/howto_js_draggable.asp
   var pos1 = 0,
     pos2 = 0,
@@ -130,7 +189,7 @@ function dragElement(elmnt) {
     document.onmouseup = null;
     document.onmousemove = null;
   }
-}
+};
 
 const organize_pill = wind => {
   /* 
@@ -152,6 +211,17 @@ const organize_pill = wind => {
       item.style.zIndex = 100 - index;
     });
   }
+};
+
+const destroyAllWindows = () => {
+  /* 
+  Remove todas janelas e icones do documento
+  */
+  document.querySelectorAll(".__window").forEach(elem => {
+    elem.remove();
+  });
+
+  pill = [];
 };
 
 const focus_window = (window, icon) => {
@@ -206,4 +276,9 @@ const icon_click = (window, icon) => {
   }
 };
 
-module.exports = { createWindow, focus_window };
+module.exports = {
+  createWindow,
+  focus_window,
+  destroyAllWindows,
+  windowsAndIconsListeners,
+};

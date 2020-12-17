@@ -1,4 +1,10 @@
-const { createWindow, focus_window } = require("./window.js");
+const {
+  createWindow,
+  focus_window,
+  destroyAllWindows,
+} = require("./window.js");
+const { destroyAllIcons } = require("./icon.js");
+const { logonAnimations } = require("./animations.js");
 
 const getTaskbarIconElement = source => {
   return document.querySelector(`.__task_bar_icon[data-target='${source}']`);
@@ -27,4 +33,21 @@ const createElementFromHTML = htmlString => {
   return div.firstChild;
 };
 
-module.exports = { getTaskbarIconElement, createElementFromHTML, openApp };
+const restartSystem = () => {
+  logonAnimations();
+  // fecha o menu iniciar
+  document.getElementById("_menu").classList.remove("active");
+  document.getElementById("_menu").classList.add("unactive");
+  document.getElementById("_menu_icon").classList.remove("focused");
+  // destroi todas janelas
+  destroyAllWindows();
+  // destroi todos icons
+  destroyAllIcons();
+};
+
+module.exports = {
+  getTaskbarIconElement,
+  createElementFromHTML,
+  openApp,
+  restartSystem,
+};

@@ -99,47 +99,35 @@ module.exports = {
 };
 
 },{}],3:[function(require,module,exports){
-const desktopContextMenuListener = () => {
-  const context_menu = document.querySelector("#__context_menu");
-  const items = context_menu.querySelectorAll("li");
-  const { animateDesktopShortcuts } = require("./animations.js");
-
-  items.forEach(item => {
-    item.addEventListener("click", () => {
-      let event = item.dataset.func;
-
-      if (event === "refresh") {
-        animateDesktopShortcuts();
-      }
-
-      context_menu.classList.remove("active");
-    });
-  });
-
-  document.addEventListener("click", e => {
-    if (!context_menu.contains(e.target))
-      context_menu.classList.remove("active");
-  });
-};
-
-module.exports = { desktopContextMenuListener };
-
-},{"./animations.js":2}],4:[function(require,module,exports){
 const { openApp } = require("./actions.js");
-const { desktopContextMenuListener } = require("./context_menu.js");
 
-const desktopMenuContextListener = () => {
+const desktopContextMenuListener = () => {
   /* 
     Adiciona o listener de menucontext do desktop
   */
   const desktop = document.querySelector(".__desktop");
+  const shortcuts = document.querySelectorAll(".__desktop_icon");
+  const context_menu = document.querySelector("#__context_menu_desktop");
+  const items = context_menu.querySelectorAll("li");
+  const { animateDesktopShortcuts } = require("./animations.js");
 
   desktop.addEventListener("contextmenu", e => {
     // TODO
     // abrir o menu pra esquerda se estiver bem na direita
     // abrir pra cima se estiver muito baixo
     e.preventDefault(); // desativa o contextmenu padrao
-    const context_menu = document.querySelector("#__context_menu");
+
+    let click_in_shortcut = false;
+
+    shortcuts.forEach(shortcut => {
+      // percorre todos atalhos
+      if (shortcut.contains(e.target)) click_in_shortcut = true;
+    });
+
+    if (click_in_shortcut) {
+      // nao abre se o click foi em um atalho
+      return false;
+    }
 
     context_menu.style.left = e.pageX + 1 + "px";
     context_menu.style.top = e.pageY + 1 + "px";
@@ -152,7 +140,100 @@ const desktopMenuContextListener = () => {
 
     return false;
   });
+
+  items.forEach(item => {
+    /* 
+    Adiciona os listeners de cada funcao do contextmenu 
+    */
+    item.addEventListener("click", () => {
+      let event = item.dataset.func;
+
+      if (event === "refresh") {
+        animateDesktopShortcuts();
+      }
+
+      context_menu.classList.remove("active");
+    });
+  });
+
+  document.addEventListener("click", e => {
+    /* 
+    listener para fechar o menu se clicar fora dele
+    */
+    if (!context_menu.contains(e.target))
+      context_menu.classList.remove("active");
+  });
 };
+
+const shortcutContextMenuListener = () => {
+  /* 
+    Adiciona o listener de menucontext dos atalhos
+  */
+  const shortcuts = document.querySelectorAll(".__desktop_icon");
+  const context_menu = document.querySelector("#__context_menu_shortcut");
+  const items = context_menu.querySelectorAll("li");
+
+  shortcuts.forEach(shortcut => {
+    shortcut.addEventListener("contextmenu", e => {
+      e.preventDefault(); // desativa o contextmenu padrao
+      console.log("context menu in shortcut");
+      context_menu.style.left = e.pageX + 1 + "px";
+      context_menu.style.top = e.pageY + 1 + "px";
+
+      if (context_menu.classList.contains("active")) {
+        return false;
+      }
+
+      context_menu.classList.toggle("active");
+
+      // foca o atalho e desfoca os outros
+      shortcut.classList.add("focused");
+      shortcuts.forEach(shortcut2 => {
+        if (shortcut !== shortcut2) shortcut2.classList.remove("focused");
+      });
+
+      items.forEach(item => {
+        /* 
+        Adiciona os listeners de cada funcao do contextmenu 
+        */
+        let open = () => {
+          /* 
+          executa a funcao e remove o listener para nao acumular
+          */
+          let event = item.dataset.func;
+
+          if (event === "open") {
+            openApp(shortcut.dataset.source);
+          }
+
+          item.removeEventListener("click", open);
+
+          context_menu.classList.remove("active");
+        };
+
+        item.addEventListener("click", open);
+      });
+
+      return false;
+    });
+
+    document.addEventListener("click", e => {
+      /* 
+      listener para fechar o menu se clicar fora dele
+      */
+      if (!context_menu.contains(e.target))
+        context_menu.classList.remove("active");
+    });
+  });
+};
+
+shortcutContextMenuListener();
+
+module.exports = { desktopContextMenuListener };
+
+},{"./actions.js":1,"./animations.js":2}],4:[function(require,module,exports){
+const { openApp } = require("./actions.js");
+const { desktopContextMenuListener } = require("./context_menu.js");
 
 const desktopShortcutsListeners = () => {
   const shortcuts = document.querySelectorAll(".__desktop_icon");
@@ -178,7 +259,7 @@ const desktopShortcutsListeners = () => {
   });
 
   const unfocusShortcuts = e => {
-    /* desfoca todos atalhos da area de trabalho e o evento
+    /* desfoca todos atalhos da area de trabalho se o evento
     nao foi em algum deles
     */
     let click_in_shortcut = false;
@@ -197,26 +278,10 @@ const desktopShortcutsListeners = () => {
   };
 
   document.addEventListener("click", e => unfocusShortcuts(e));
-  document.addEventListener("contextmenu", e => {
-    e.preventDefault();
-    unfocusShortcuts(e);
-
-    let click_in_shortcut = false;
-
-    shortcuts.forEach(shortcut => {
-      // percorre todos atalhos
-      if (shortcut.contains(e.target)) click_in_shortcut = true;
-    });
-
-    if (click_in_shortcut) {
-      console.log("contextmenu in shortcut");
-    }
-  });
 };
 
 const desktopInit = () => {
   desktopContextMenuListener();
-  desktopMenuContextListener();
   desktopShortcutsListeners();
 };
 
@@ -730,6 +795,8 @@ const createWindow = source => {
   });
 
   focus_window(window, icon);
+  // foca a janela depois de um tempo para garantir
+  setTimeout(() => focus_window(window, icon), 10);
 
   // adiciona a janela no topo da pilha
   pill.unshift(window);

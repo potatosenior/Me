@@ -1,32 +1,6 @@
 const { openApp } = require("./actions.js");
 const { desktopContextMenuListener } = require("./context_menu.js");
 
-const desktopMenuContextListener = () => {
-  /* 
-    Adiciona o listener de menucontext do desktop
-  */
-  const desktop = document.querySelector(".__desktop");
-
-  desktop.addEventListener("contextmenu", e => {
-    // TODO
-    // abrir o menu pra esquerda se estiver bem na direita
-    // abrir pra cima se estiver muito baixo
-    e.preventDefault(); // desativa o contextmenu padrao
-    const context_menu = document.querySelector("#__context_menu");
-
-    context_menu.style.left = e.pageX + 1 + "px";
-    context_menu.style.top = e.pageY + 1 + "px";
-
-    if (context_menu.classList.contains("active")) {
-      return false;
-    }
-
-    context_menu.classList.toggle("active");
-
-    return false;
-  });
-};
-
 const desktopShortcutsListeners = () => {
   const shortcuts = document.querySelectorAll(".__desktop_icon");
 
@@ -51,7 +25,7 @@ const desktopShortcutsListeners = () => {
   });
 
   const unfocusShortcuts = e => {
-    /* desfoca todos atalhos da area de trabalho e o evento
+    /* desfoca todos atalhos da area de trabalho se o evento
     nao foi em algum deles
     */
     let click_in_shortcut = false;
@@ -70,26 +44,10 @@ const desktopShortcutsListeners = () => {
   };
 
   document.addEventListener("click", e => unfocusShortcuts(e));
-  document.addEventListener("contextmenu", e => {
-    e.preventDefault();
-    unfocusShortcuts(e);
-
-    let click_in_shortcut = false;
-
-    shortcuts.forEach(shortcut => {
-      // percorre todos atalhos
-      if (shortcut.contains(e.target)) click_in_shortcut = true;
-    });
-
-    if (click_in_shortcut) {
-      console.log("contextmenu in shortcut");
-    }
-  });
 };
 
 const desktopInit = () => {
   desktopContextMenuListener();
-  desktopMenuContextListener();
   desktopShortcutsListeners();
 };
 

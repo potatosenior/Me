@@ -81,6 +81,8 @@ const createWindow = source => {
   });
 
   focus_window(window, icon);
+  // foca a janela depois de um tempo para garantir
+  setTimeout(() => focus_window(window, icon), 10);
 
   // adiciona a janela no topo da pilha
   pill.unshift(window);

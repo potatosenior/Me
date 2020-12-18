@@ -454,7 +454,7 @@ task_bar {
 }
 
 /* ---------------------- CONTEXT MENU  */
-#__context_menu {
+.__context_menu {
   position: absolute;
   display: flex;
   left: 0;
@@ -466,16 +466,17 @@ task_bar {
   transform: scale(0);
   transition: transform 0.3s;
   transform-origin: top left;
+  z-index: -1;
 }
 
-#__context_menu ul {
+.__context_menu ul {
   display: flex;
   flex-direction: column;
   width: 100%;
   overflow: hidden;
 }
 
-#__context_menu li {
+.__context_menu li {
   display: flex;
   align-items: center;
   padding: 5px;
@@ -487,11 +488,11 @@ task_bar {
   cursor: pointer;
 }
 
-#__context_menu li:hover {
+.__context_menu li:hover {
   background-color: hsla(0, 0%, 78.4%, 0.3);
 }
 
-#__context_menu.active {
+.__context_menu.active {
   z-index: 1000;
   transform: scale(1);
 }

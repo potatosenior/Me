@@ -20,8 +20,53 @@ const createIcon = source => {
   });
 
   icon_in_doom.addEventListener("contextmenu", e => {
-    console.log("context menu in taskbar icon");
-    e.preventDefault();
+    const { closeApp } = require("./actions.js");
+
+    const context_menu = document.querySelector("#__context_menu_icon");
+    const items = context_menu.querySelectorAll("li");
+
+    e.preventDefault(); // desativa o contextmenu padrao
+    context_menu.style.left = e.pageX + 1 + "px";
+    // faz o menu aparecer pra cima
+    context_menu.style.top = e.pageY - context_menu.offsetHeight + "px";
+
+    if (context_menu.classList.contains("active")) {
+      return false;
+    }
+
+    context_menu.classList.toggle("active");
+
+    items.forEach(item => {
+      /* 
+        Adiciona os listeners de cada funcao do contextmenu 
+        */
+      let close = () => {
+        /* 
+          executa a funcao e remove o listener para nao acumular
+          */
+        let event = item.dataset.func;
+
+        if (event === "close") {
+          closeApp(source);
+        }
+
+        item.removeEventListener("click", close);
+
+        context_menu.classList.remove("active");
+      };
+
+      item.addEventListener("click", close);
+    });
+
+    document.addEventListener("click", e => {
+      /* 
+      listener para fechar o menu se clicar fora dele
+      */
+      if (!context_menu.contains(e.target))
+        context_menu.classList.remove("active");
+    });
+
+    return false;
   });
 
   return icon_in_doom;

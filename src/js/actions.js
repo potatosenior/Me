@@ -24,6 +24,17 @@ const openApp = source => {
   createWindow(source);
 };
 
+const closeApp = source => {
+  /* 
+  seleciona o botao de fechar o app e simula um click no mesmo
+  */
+  const button = document
+    .querySelector(`[data-app="${source}"]`)
+    .querySelector('[data-close="true"]');
+  // simula o click no botao de fechar
+  button.dispatchEvent(new MouseEvent("click"));
+};
+
 const createElementFromHTML = htmlString => {
   // help: https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro
   var div = document.createElement("div");
@@ -50,4 +61,5 @@ module.exports = {
   createElementFromHTML,
   openApp,
   restartSystem,
+  closeApp,
 };

@@ -26,7 +26,7 @@ main {
 }
 
 main {
-  background-image: url("../../assets/wallpaper7.jpg");
+  background-image: url("../../assets/wallpapers/wallpaper7.jpg");
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -495,6 +495,10 @@ task_bar {
 .__context_menu.active {
   z-index: 1000;
   transform: scale(1);
+}
+
+#__context_menu_icon {
+  transform-origin: bottom left !important;
 }
 /* ---------------------- OUTROS */
 .row {

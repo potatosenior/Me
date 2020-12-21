@@ -25,6 +25,17 @@ const openApp = source => {
   createWindow(source);
 };
 
+const closeApp = source => {
+  /* 
+  seleciona o botao de fechar o app e simula um click no mesmo
+  */
+  const button = document
+    .querySelector(`[data-app="${source}"]`)
+    .querySelector('[data-close="true"]');
+  // simula o click no botao de fechar
+  button.dispatchEvent(new MouseEvent("click"));
+};
+
 const createElementFromHTML = htmlString => {
   // help: https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro
   var div = document.createElement("div");
@@ -51,6 +62,7 @@ module.exports = {
   createElementFromHTML,
   openApp,
   restartSystem,
+  closeApp,
 };
 
 },{"./animations.js":2,"./icon.js":5,"./window.js":11}],2:[function(require,module,exports){
@@ -165,18 +177,106 @@ const desktopContextMenuListener = () => {
   });
 };
 
-const shortcutContextMenuListener = () => {
+const contextMenuInit = () => {
+  desktopContextMenuListener();
+};
+
+module.exports = contextMenuInit;
+
+},{"./actions.js":1,"./animations.js":2}],4:[function(require,module,exports){
+const { openApp } = require("./actions.js");
+
+const desktopContextMenuListener = () => {
   /* 
-    Adiciona o listener de menucontext dos atalhos
+    Adiciona o listener de menucontext do desktop
   */
+  const desktop = document.querySelector(".__desktop");
+  const shortcuts = document.querySelectorAll(".__desktop_icon");
+  const context_menu = document.querySelector("#__context_menu_desktop");
+  const items = context_menu.querySelectorAll("li");
+  const { animateDesktopShortcuts } = require("./animations.js");
+
+  desktop.addEventListener("contextmenu", e => {
+    // TODO
+    // abrir o menu pra esquerda se estiver bem na direita
+    // abrir pra cima se estiver muito baixo
+    e.preventDefault(); // desativa o contextmenu padrao
+
+    let click_in_shortcut = false;
+
+    shortcuts.forEach(shortcut => {
+      // percorre todos atalhos
+      if (shortcut.contains(e.target)) click_in_shortcut = true;
+    });
+
+    if (click_in_shortcut) {
+      // nao abre se o click foi em um atalho
+      return false;
+    }
+
+    context_menu.style.left = e.pageX + 1 + "px";
+    context_menu.style.top = e.pageY + 1 + "px";
+
+    if (context_menu.classList.contains("active")) {
+      return false;
+    }
+
+    context_menu.classList.toggle("active");
+
+    return false;
+  });
+
+  items.forEach(item => {
+    /* 
+    Adiciona os listeners de cada funcao do contextmenu 
+    */
+    item.addEventListener("click", () => {
+      let event = item.dataset.func;
+
+      if (event === "refresh") {
+        animateDesktopShortcuts();
+      }
+
+      context_menu.classList.remove("active");
+    });
+  });
+
+  document.addEventListener("click", e => {
+    /* 
+    listener para fechar o menu se clicar fora dele
+    */
+    if (!context_menu.contains(e.target))
+      context_menu.classList.remove("active");
+  });
+};
+
+const desktopShortcutsListeners = () => {
   const shortcuts = document.querySelectorAll(".__desktop_icon");
   const context_menu = document.querySelector("#__context_menu_shortcut");
   const items = context_menu.querySelectorAll("li");
 
   shortcuts.forEach(shortcut => {
+    // INICIALIZA OS ATALHOS NA AREA DE TRABALHO
+    // adiciona o listener de clck para focar o shortcut
+    shortcut.addEventListener("click", () => {
+      shortcut.classList.add("focused");
+
+      shortcuts.forEach(shortcut2 => {
+        if (shortcut !== shortcut2) shortcut2.classList.remove("focused");
+      });
+    });
+
+    // Adiciona o listener de abrir os aplicativos
+    shortcut.addEventListener("dblclick", () => {
+      // nome unico global
+      const source = shortcut.dataset.source;
+
+      openApp(source);
+    });
+
+    // Adiciona o listener de context menu
     shortcut.addEventListener("contextmenu", e => {
       e.preventDefault(); // desativa o contextmenu padrao
-      console.log("context menu in shortcut");
       context_menu.style.left = e.pageX + 1 + "px";
       context_menu.style.top = e.pageY + 1 + "px";
 
@@ -216,46 +316,6 @@ const shortcutContextMenuListener = () => {
 
       return false;
     });
-
-    document.addEventListener("click", e => {
-      /* 
-      listener para fechar o menu se clicar fora dele
-      */
-      if (!context_menu.contains(e.target))
-        context_menu.classList.remove("active");
-    });
-  });
-};
-
-shortcutContextMenuListener();
-
-module.exports = { desktopContextMenuListener };
-
-},{"./actions.js":1,"./animations.js":2}],4:[function(require,module,exports){
-const { openApp } = require("./actions.js");
-const { desktopContextMenuListener } = require("./context_menu.js");
-
-const desktopShortcutsListeners = () => {
-  const shortcuts = document.querySelectorAll(".__desktop_icon");
-
-  shortcuts.forEach(shortcut => {
-    // INICIALIZA OS ATALHOS NA AREA DE TRABALHO
-    // adiciona o listener de clck para focar o shortcut
-    shortcut.addEventListener("click", () => {
-      shortcut.classList.add("focused");
-
-      shortcuts.forEach(shortcut2 => {
-        if (shortcut !== shortcut2) shortcut2.classList.remove("focused");
-      });
-    });
-
-    // Adiciona o listener de abrir os aplicativos
-    shortcut.addEventListener("dblclick", () => {
-      // nome unico global
-      const source = shortcut.dataset.source;
-
-      openApp(source);
-    });
   });
 
   const unfocusShortcuts = e => {
@@ -277,7 +337,15 @@ const desktopShortcutsListeners = () => {
     }
   };
 
-  document.addEventListener("click", e => unfocusShortcuts(e));
+  document.addEventListener("click", e => {
+    /* 
+      listeners para fechar o contexmenu e desfocar o atalho 
+      se clicar fora deles
+      */
+    if (!context_menu.contains(e.target))
+      context_menu.classList.remove("active");
+    unfocusShortcuts(e);
+  });
 };
 
 const desktopInit = () => {
@@ -287,7 +355,7 @@ const desktopInit = () => {
 
 module.exports = desktopInit;
 
-},{"./actions.js":1,"./context_menu.js":3}],5:[function(require,module,exports){
+},{"./actions.js":1,"./animations.js":2}],5:[function(require,module,exports){
 const icons = document.querySelectorAll(".__desktop_icon");
 
 const createIcon = source => {
@@ -310,8 +378,53 @@ const createIcon = source => {
   });
 
   icon_in_doom.addEventListener("contextmenu", e => {
-    console.log("context menu in taskbar icon");
-    e.preventDefault();
+    const { closeApp } = require("./actions.js");
+
+    const context_menu = document.querySelector("#__context_menu_icon");
+    const items = context_menu.querySelectorAll("li");
+
+    e.preventDefault(); // desativa o contextmenu padrao
+    context_menu.style.left = e.pageX + 1 + "px";
+    // faz o menu aparecer pra cima
+    context_menu.style.top = e.pageY - context_menu.offsetHeight + "px";
+
+    if (context_menu.classList.contains("active")) {
+      return false;
+    }
+
+    context_menu.classList.toggle("active");
+
+    items.forEach(item => {
+      /* 
+        Adiciona os listeners de cada funcao do contextmenu 
+        */
+      let close = () => {
+        /* 
+          executa a funcao e remove o listener para nao acumular
+          */
+        let event = item.dataset.func;
+
+        if (event === "close") {
+          closeApp(source);
+        }
+
+        item.removeEventListener("click", close);
+
+        context_menu.classList.remove("active");
+      };
+
+      item.addEventListener("click", close);
+    });
+
+    document.addEventListener("click", e => {
+      /* 
+      listener para fechar o menu se clicar fora dele
+      */
+      if (!context_menu.contains(e.target))
+        context_menu.classList.remove("active");
+    });
+
+    return false;
   });
 
   return icon_in_doom;
@@ -324,12 +437,13 @@ const destroyAllIcons = () => {
 };
 module.exports = { createIcon, destroyAllIcons };
 
-},{}],6:[function(require,module,exports){
+},{"./actions.js":1}],6:[function(require,module,exports){
 require("./settings_system.js");
 require("./actions.js");
 const desktop = require("./desktop.js");
 const task_bar = require("./task_bar.js");
 const menu = require("./menu.js");
+const context_menu = require("./context_menu.js");
 const { logonAnimations } = require("./animations.js");
 const { windowsAndIconsListeners } = require("./window.js");
 
@@ -337,11 +451,12 @@ logonAnimations();
 desktop();
 task_bar();
 menu();
+context_menu();
 windowsAndIconsListeners();
 
 console.log("hello world!!!");
 
-},{"./actions.js":1,"./animations.js":2,"./desktop.js":4,"./menu.js":7,"./settings_system.js":8,"./task_bar.js":9,"./window.js":11}],7:[function(require,module,exports){
+},{"./actions.js":1,"./animations.js":2,"./context_menu.js":3,"./desktop.js":4,"./menu.js":7,"./settings_system.js":8,"./task_bar.js":9,"./window.js":11}],7:[function(require,module,exports){
 const { openApp, restartSystem } = require("./actions.js");
 
 const menu = document.getElementById("_menu");

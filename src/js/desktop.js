@@ -84,7 +84,7 @@ const desktopShortcutsListeners = () => {
     shortcut.addEventListener("dblclick", () => {
       // nome unico global
       const source = shortcut.dataset.source;
-
+      shortcut.classList.remove("focused");
       openApp(source);
     });
 

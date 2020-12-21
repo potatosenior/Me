@@ -16,6 +16,7 @@ const openApp = source => {
   if (open) {
     // app ja esta aberto, então foca o mesmo
     let icon = getTaskbarIconElement(source);
+    open.classList.remove("__window_minimized");
 
     focus_window(open, icon);
     return;

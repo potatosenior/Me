@@ -17,6 +17,7 @@ const openApp = source => {
   if (open) {
     // app ja esta aberto, então foca o mesmo
     let icon = getTaskbarIconElement(source);
+    open.classList.remove("__window_minimized");
 
     focus_window(open, icon);
     return;
@@ -270,7 +271,7 @@ const desktopShortcutsListeners = () => {
     shortcut.addEventListener("dblclick", () => {
       // nome unico global
       const source = shortcut.dataset.source;
-
+      shortcut.classList.remove("focused");
       openApp(source);
     });
 

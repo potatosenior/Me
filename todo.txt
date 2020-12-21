@@ -1,4 +1,4 @@
 desfocar tudo se clicar com o botao direito do mouse no desktop
 
-criar uma funcao generica pra executar outra 
-funcao quando usuario clicar ou abrir o contextmenu
+double click no atalho com app 
+ja aberto nao esta focando o mesmo se ele estiver minimizado

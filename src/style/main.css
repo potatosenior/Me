@@ -151,7 +151,7 @@ svg {
   display: flex;
   flex-direction: column;
   position: absolute;
-  width: 60%;
+  width: 50%;
   height: 500px;
   max-height: 500px;
   z-index: 10;
@@ -179,7 +179,7 @@ svg {
 }
 
 .__window_fullscren {
-  width: 100%;
+  width: 100% !important;
   height: 95% !important;
   top: 0 !important;
   left: 0 !important;
@@ -394,7 +394,7 @@ task_bar {
   justify-content: flex-start;
   height: 5%;
   width: 100vw;
-  z-index: 10000;
+  z-index: 99999999;
   /* background-color: blue; */
   /* background-color: transparent; */
   /* background-color: #f5f5f5; */
@@ -501,23 +501,32 @@ task_bar {
   transform-origin: bottom left !important;
 }
 /* ---------------------- OUTROS */
-.row {
-  display: flex;
-  flex-direction: row;
-}
 
 /* ---------------------- SCROLL BAR */
+/* ._scrollbar::-webkit-scrollbar {
+  height: 15px !important;
+}
 
-._scrollbar::-webkit-scrollbar {
+._scrollbar::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+._scrollbar::-webkit-scrollbar-thumb {
+  background-color: #303030;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+} */
+
+div::-webkit-scrollbar {
   /* width: 15px !important; */
   height: 15px !important;
 }
 
-/* ._scrollbar::-webkit-scrollbar-track {
+/* div::-webkit-scrollbar-track {
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 } */
 
-._scrollbar::-webkit-scrollbar-thumb {
+div::-webkit-scrollbar-thumb {
   background-color: #303030;
   /* outline: 1px solid slategrey;  */
   border-radius: 8px;
@@ -528,6 +537,11 @@ task_bar {
 .__window_fullscren .__about_me {
   padding-left: 10rem !important;
   padding-right: 10rem !important;
+}
+
+.__about_me div {
+  display: flex;
+  flex-direction: row;
 }
 
 .__about_me h2 {
@@ -542,6 +556,7 @@ task_bar {
   object-fit: contain;
   margin-top: 30px;
   margin-left: 20px;
+  align-self: center;
 }
 
 .__about_me p {
@@ -556,8 +571,8 @@ task_bar {
   align-items: center;
   overflow: scroll;
   overflow-x: hidden;
-  padding-left: 3rem;
-  padding-right: 3rem;
+  padding-left: 5rem;
+  padding-right: 5rem;
 }
 
 .__projects h2 {
@@ -615,7 +630,7 @@ task_bar {
 
 .__projects span {
   text-align: justify;
-  font-size: 1rem;
+  font-size: 1.1rem;
   margin-bottom: 20px;
 }
 
@@ -713,8 +728,8 @@ task_bar {
 }
 
 .__window_fullscren .__skills img {
-  width: 196px;
-  height: 196px;
+  width: 166px;
+  height: 166px;
 }
 
 /* -------------------------- CONTACT  */
@@ -723,6 +738,7 @@ task_bar {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
+  flex-wrap: wrap;
   margin: 30px;
 }
 
@@ -755,6 +771,10 @@ task_bar {
 /* ------------------------------ CONFIG  */
 .__config h1 {
   font-size: 2rem;
+}
+
+.__window_fullscren .__config h1 {
+  font-size: 2.5rem;
 }
 
 .__config ul {
@@ -790,7 +810,6 @@ task_bar {
   align-items: center;
   justify-content: flex-start;
   font-weight: 300;
-  font-size: 0.9rem;
   padding: 10px 30px;
   transition: background-color 0.3s;
   cursor: pointer;
@@ -802,8 +821,8 @@ task_bar {
 }
 
 .__config_button_back span {
-  margin-left: 5%;
-  font-size: 1.1rem;
+  margin-left: 5px;
+  font-size: 1rem;
 }
 
 .__window_fullscren .__config_button_back span {
@@ -836,7 +855,7 @@ task_bar {
 }
 
 .__config_list li span {
-  margin-left: 10%;
+  margin-left: 5px;
 }
 
 .__config_list li svg {
@@ -904,7 +923,7 @@ task_bar {
   justify-content: center;
   margin-right: 5px;
   margin-top: 5px;
-  flex-basis: 30%;
+  flex-basis: 28%;
   border: 2px solid transparent;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -1004,7 +1023,7 @@ task_bar {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  height: 10%;
+  height: 35px;
 }
 
 .__trashcan .__colum_names span:first-child {
@@ -1016,10 +1035,11 @@ task_bar {
   align-items: center;
   height: 100%;
   flex-basis: 33%;
-  text-indent: 10px;
+  /* text-indent: 10px; */
   font-weight: 400;
   border-left: solid 1px #616161;
   font-size: 1.1rem;
+  padding-left: 10px;
 }
 
 .__trashcan ul {
@@ -1049,6 +1069,7 @@ task_bar {
   flex-basis: 33%;
   padding: 5px 10px;
   font-weight: 100;
+  font-size: 1rem;
 }
 
 /* ---------------------------- OLD PORTFOLIO  */
@@ -1082,6 +1103,10 @@ task_bar {
 /* ---------------------------- REPONSIVIDADE DESKTOP  */
 @media screen and (max-width: 1000px) {
   /* WINDOW  */
+  .__window {
+    width: 70%;
+  }
+
   .__window_content > div {
     padding-left: 2rem;
     padding-right: 2rem;
@@ -1119,12 +1144,123 @@ task_bar {
   .__under_development {
     display: flex;
   }
+
+  /* ABOUT ME  */
+  .__about_me img {
+    height: 150px;
+  }
+
+  .__window_fullscren .__about_me {
+    padding-left: 6rem !important;
+    padding-right: 6rem !important;
+  }
+
+  /* PROJECTS  */
+  .__projects a {
+    font-size: 1.6rem;
+  }
+
+  .__window_fullscren .__projects a {
+    font-size: 1.8rem;
+  }
+
+  .__projects span {
+    font-size: 0.9rem;
+  }
+
+  .__window_fullscren .__projects span {
+    font-size: 1.1rem;
+  }
+
+  .__tweet {
+    width: 80%;
+  }
+
+  /* SKILLS  */
+  .__skills img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .__window_fullscren .__skills img {
+    width: 130px;
+    height: 130px;
+  }
+
+  /* CONTACT  */
+  .__contact img {
+    width: 76px;
+    height: 76px;
+  }
+
+  /* TRASHCAN  */
+  .__trashcan .__colum_names span {
+    font-size: 1rem;
+  }
+
+  .__trashcan li span {
+    font-size: 0.9rem;
+  }
+
+  /* CONFIG  */
+  .__window_fullscren .__config h1 {
+    font-size: 2rem;
+  }
+
+  .__config li {
+    padding: 8px 30px;
+    font-size: 0.9rem;
+  }
+
+  .__config_button_back span {
+    font-size: 0.9rem;
+  }
+
+  .__window_fullscren .__config_button_back span {
+    font-size: 1.4rem;
+  }
+
+  .__config_list li span {
+    font-size: 0.9rem;
+  }
+
+  .__config_content select {
+    padding: 4px 12px;
+    font-size: 0.8rem;
+  }
+
+  .__load_img label {
+    font-size: 0.9rem;
+  }
+
+  .__opt_colors li div {
+    height: 60px;
+  }
+
+  .__window_fullscren .__opt_colors li div {
+    height: 90px;
+  }
 }
+
+/* ------------------------ 700 PX  */
 
 @media screen and (max-width: 700px) {
   /* WINDOW  */
+  .__window {
+    width: 80%;
+  }
+  .__window_content > div {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .__window_fullscren .__window_content > div {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+
   .__window_content h1 {
-    font-size: 1.7rem;
+    font-size: 1.6rem;
   }
 
   .__window_fullscren .__window_content h1 {
@@ -1149,6 +1285,105 @@ task_bar {
 
   .__under_development {
     display: flex;
+  }
+
+  /* ABOUT ME  */
+  .__window_fullscren .__about_me {
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+  }
+
+  .__about_me div {
+    flex-direction: column;
+  }
+
+  .__about_me img {
+    height: 180px;
+    border: none;
+    margin-left: 0px;
+  }
+
+  /* PROJECTS  */
+  .__window_fullscren .__projects {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .__projects a {
+    font-size: 1.2rem;
+  }
+
+  .__window_fullscren .__projects a {
+    font-size: 1.6rem;
+  }
+
+  .__projects span {
+    font-size: 0.8rem;
+  }
+
+  .__window_fullscren .__projects span {
+    font-size: 0.9rem;
+  }
+
+  .__tweet {
+    width: 90%;
+  }
+
+  /* SKILLS  */
+  .__skills img {
+    width: 70px;
+    height: 70px;
+  }
+
+  .__window_fullscren .__skills img {
+    width: 96px;
+    height: 96px;
+  }
+
+  /* CONTACT  */
+  .__contact img {
+    width: 56px;
+    height: 56px;
+  }
+
+  /* TRASHCAN  */
+  .__trashcan .__colum_names span {
+    font-size: 0.8rem;
+  }
+
+  .__trashcan li span {
+    font-size: 0.7rem;
+  }
+
+  /* CONFIG  */
+  .__window_fullscren .__config h1 {
+    font-size: 1.5rem;
+  }
+
+  .__config li {
+    padding: 5px 20px;
+    font-size: 0.8rem;
+  }
+
+  .__config_list li span {
+    font-size: 0.7rem;
+  }
+
+  .__config_content select {
+    padding: 2px 6px;
+    font-size: 0.7rem;
+  }
+
+  .__load_img label {
+    font-size: 0.7rem;
+  }
+
+  .__opt_colors li div {
+    height: 50px;
+  }
+
+  .__window_fullscren .__opt_colors li div {
+    height: 70px;
   }
 }
 

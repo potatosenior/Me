@@ -66,7 +66,7 @@ module.exports = {
   closeApp,
 };
 
-},{"./animations.js":2,"./icon.js":5,"./window.js":11}],2:[function(require,module,exports){
+},{"./animations.js":2,"./icon.js":4,"./window.js":10}],2:[function(require,module,exports){
 const logonAnimationDurations = 2000;
 
 const loadingSystemAnimation = () => {
@@ -112,79 +112,6 @@ module.exports = {
 };
 
 },{}],3:[function(require,module,exports){
-const { openApp } = require("./actions.js");
-
-const desktopContextMenuListener = () => {
-  /* 
-    Adiciona o listener de menucontext do desktop
-  */
-  const desktop = document.querySelector(".__desktop");
-  const shortcuts = document.querySelectorAll(".__desktop_icon");
-  const context_menu = document.querySelector("#__context_menu_desktop");
-  const items = context_menu.querySelectorAll("li");
-  const { animateDesktopShortcuts } = require("./animations.js");
-
-  desktop.addEventListener("contextmenu", e => {
-    // TODO
-    // abrir o menu pra esquerda se estiver bem na direita
-    // abrir pra cima se estiver muito baixo
-    e.preventDefault(); // desativa o contextmenu padrao
-
-    let click_in_shortcut = false;
-
-    shortcuts.forEach(shortcut => {
-      // percorre todos atalhos
-      if (shortcut.contains(e.target)) click_in_shortcut = true;
-    });
-
-    if (click_in_shortcut) {
-      // nao abre se o click foi em um atalho
-      return false;
-    }
-
-    context_menu.style.left = e.pageX + 1 + "px";
-    context_menu.style.top = e.pageY + 1 + "px";
-
-    if (context_menu.classList.contains("active")) {
-      return false;
-    }
-
-    context_menu.classList.toggle("active");
-
-    return false;
-  });
-
-  items.forEach(item => {
-    /* 
-    Adiciona os listeners de cada funcao do contextmenu 
-    */
-    item.addEventListener("click", () => {
-      let event = item.dataset.func;
-
-      if (event === "refresh") {
-        animateDesktopShortcuts();
-      }
-
-      context_menu.classList.remove("active");
-    });
-  });
-
-  document.addEventListener("click", e => {
-    /* 
-    listener para fechar o menu se clicar fora dele
-    */
-    if (!context_menu.contains(e.target))
-      context_menu.classList.remove("active");
-  });
-};
-
-const contextMenuInit = () => {
-  desktopContextMenuListener();
-};
-
-module.exports = contextMenuInit;
-
-},{"./actions.js":1,"./animations.js":2}],4:[function(require,module,exports){
 const { openApp } = require("./actions.js");
 
 const desktopContextMenuListener = () => {
@@ -356,7 +283,7 @@ const desktopInit = () => {
 
 module.exports = desktopInit;
 
-},{"./actions.js":1,"./animations.js":2}],5:[function(require,module,exports){
+},{"./actions.js":1,"./animations.js":2}],4:[function(require,module,exports){
 const icons = document.querySelectorAll(".__desktop_icon");
 
 const createIcon = source => {
@@ -438,13 +365,12 @@ const destroyAllIcons = () => {
 };
 module.exports = { createIcon, destroyAllIcons };
 
-},{"./actions.js":1}],6:[function(require,module,exports){
+},{"./actions.js":1}],5:[function(require,module,exports){
 require("./settings_system.js");
 require("./actions.js");
 const desktop = require("./desktop.js");
 const task_bar = require("./task_bar.js");
 const menu = require("./menu.js");
-const context_menu = require("./context_menu.js");
 const { logonAnimations } = require("./animations.js");
 const { windowsAndIconsListeners } = require("./window.js");
 
@@ -452,12 +378,11 @@ logonAnimations();
 desktop();
 task_bar();
 menu();
-context_menu();
 windowsAndIconsListeners();
 
 console.log("hello world!!!");
 
-},{"./actions.js":1,"./animations.js":2,"./context_menu.js":3,"./desktop.js":4,"./menu.js":7,"./settings_system.js":8,"./task_bar.js":9,"./window.js":11}],7:[function(require,module,exports){
+},{"./actions.js":1,"./animations.js":2,"./desktop.js":3,"./menu.js":6,"./settings_system.js":7,"./task_bar.js":8,"./window.js":10}],6:[function(require,module,exports){
 const { openApp, restartSystem } = require("./actions.js");
 
 const menu = document.getElementById("_menu");
@@ -541,7 +466,7 @@ const menuInit = () => {
 
 module.exports = menuInit;
 
-},{"./actions.js":1}],8:[function(require,module,exports){
+},{"./actions.js":1}],7:[function(require,module,exports){
 const {
   createElementFromHTML,
   getTaskbarIconElement,
@@ -685,7 +610,7 @@ const configInit = () => {
 
 module.exports = configInit;
 
-},{"./actions.js":1,"./window.js":11}],9:[function(require,module,exports){
+},{"./actions.js":1,"./window.js":10}],8:[function(require,module,exports){
 const date_time = document.getElementById("date_time");
 const week_days = [
   "segunda-feira",
@@ -755,7 +680,7 @@ const taskbarInit = () => {
 
 module.exports = taskbarInit;
 
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 const { openApp } = require("./actions.js");
 
 const oldPortofioListeners = () => {
@@ -827,7 +752,7 @@ const initTrashcan = () => {
 
 module.exports = initTrashcan;
 
-},{"./actions.js":1}],11:[function(require,module,exports){
+},{"./actions.js":1}],10:[function(require,module,exports){
 const { createIcon } = require("./icon.js");
 var pill = [];
 
@@ -1115,4 +1040,4 @@ module.exports = {
   windowsAndIconsListeners,
 };
 
-},{"./icon.js":5,"./settings_system.js":8,"./trashcan.js":10}]},{},[6]);
+},{"./icon.js":4,"./settings_system.js":7,"./trashcan.js":9}]},{},[5]);

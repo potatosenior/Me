@@ -1389,6 +1389,11 @@ div::-webkit-scrollbar-thumb {
 
 /* -------------------------- MOBILE  */
 @media screen and (max-width: 500px) {
+  /* WINDOW  */
+  .__window {
+    width: 90%;
+    left: 5%;
+  }
 }
 
 /* ------------------------ ANIMATIONS  */
